@@ -42,24 +42,8 @@ import { GeofenceSettingsScreen } from './components/screens/GeofenceSettingsScr
 import { BottomNav } from './components/common/BottomNav';
 import { SimulationBar } from './components/common/SimulationBar';
 
-// Allowed screens per role
-const ADMIN_ONLY_SCREENS = new Set([
-  'admin_dashboard',
-  'admin_hods',
-  'admin_mentors',
-  'admin_students',
-  'admin_shifts',
-  'admin_change_shift',
-  'admin_internships',
-  'admin_attendance',
-  'admin_gps_monitoring',
-  'admin_alerts',
-  'admin_reports',
-  'admin_activity_log',
-  'geofence_setup',
-]);
-
-const STUDENT_ALLOWED_SCREENS = new Set([
+// Role-Based Access Control (RBAC) Hierarchical Screen Sets
+const STUDENT_SCREENS = new Set([
   'student_dashboard',
   'active_shift',
   'verification_result',
@@ -70,7 +54,7 @@ const STUDENT_ALLOWED_SCREENS = new Set([
   'student_notifications',
 ]);
 
-const MENTOR_ALLOWED_SCREENS = new Set([
+const MENTOR_SCREENS = new Set([
   'mentor_dashboard',
   'mentor_review_arun_kumar',
   'mentor_student_details',
@@ -80,7 +64,7 @@ const MENTOR_ALLOWED_SCREENS = new Set([
   'mentor_notifications',
 ]);
 
-const HOD_ALLOWED_SCREENS = new Set([
+const HOD_SCREENS = new Set([
   'hod_dashboard',
   'department_alerts',
   'hod_alerts',
@@ -89,10 +73,9 @@ const HOD_ALLOWED_SCREENS = new Set([
   'hod_mentors',
   'hod_gps_monitoring',
   'hod_analytics_dashboard',
-  'mentor_student_details',
 ]);
 
-const ADMIN_ALLOWED_SCREENS = new Set([
+const ADMIN_SCREENS = new Set([
   'admin_dashboard',
   'admin_hods',
   'admin_mentors',
@@ -106,11 +89,24 @@ const ADMIN_ALLOWED_SCREENS = new Set([
   'admin_reports',
   'admin_activity_log',
   'geofence_setup',
-  'mentor_student_details',
-  'mentor_review_arun_kumar',
-  'student_attendance',
-  'gps_history',
-  'student_profile',
+]);
+
+// Exact Downward Hierarchy Access:
+// 1. STUDENT -> Student only
+const STUDENT_ALLOWED_SCREENS = new Set([...STUDENT_SCREENS]);
+
+// 2. MENTOR -> Mentor + Student
+const MENTOR_ALLOWED_SCREENS = new Set([...MENTOR_SCREENS, ...STUDENT_SCREENS]);
+
+// 3. HOD -> HOD + Mentor + Student
+const HOD_ALLOWED_SCREENS = new Set([...HOD_SCREENS, ...MENTOR_SCREENS, ...STUDENT_SCREENS]);
+
+// 4. ADMIN -> Admin + HOD + Mentor + Student (Full System-Wide Access)
+const ADMIN_ALLOWED_SCREENS = new Set([
+  ...ADMIN_SCREENS,
+  ...HOD_SCREENS,
+  ...MENTOR_SCREENS,
+  ...STUDENT_SCREENS,
 ]);
 
 const AppRouter: React.FC = () => {
@@ -130,11 +126,11 @@ const AppRouter: React.FC = () => {
   const isAuthorized = (() => {
     switch (currentUser.role) {
       case 'STUDENT':
-        return STUDENT_ALLOWED_SCREENS.has(currentScreen) && !ADMIN_ONLY_SCREENS.has(currentScreen);
+        return STUDENT_ALLOWED_SCREENS.has(currentScreen);
       case 'MENTOR':
-        return MENTOR_ALLOWED_SCREENS.has(currentScreen) && !ADMIN_ONLY_SCREENS.has(currentScreen);
+        return MENTOR_ALLOWED_SCREENS.has(currentScreen);
       case 'HOD':
-        return HOD_ALLOWED_SCREENS.has(currentScreen) && !ADMIN_ONLY_SCREENS.has(currentScreen);
+        return HOD_ALLOWED_SCREENS.has(currentScreen);
       case 'ADMIN':
         return ADMIN_ALLOWED_SCREENS.has(currentScreen);
       default:

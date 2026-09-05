@@ -102,8 +102,8 @@ export const Header: React.FC<HeaderProps> = ({ title = 'InternTrack', showBack 
           </button>
         )}
 
-        {/* Clickable Geofence Perimeter Badge (Mentor, HOD, and Admin only) */}
-        {currentUser?.role !== 'STUDENT' && (
+        {/* Clickable Geofence Perimeter Badge (Admin only) */}
+        {currentUser?.role === 'ADMIN' && (
           <button
             id="header-geofence-badge"
             onClick={() => setCurrentScreen('geofence_setup')}
@@ -201,11 +201,15 @@ export const Header: React.FC<HeaderProps> = ({ title = 'InternTrack', showBack 
             ) : (
               <>
                 <div className="text-[10px] uppercase font-bold text-outline-variant px-2.5 py-1">
-                  Switch Active Role
+                  Switch Active Portal
                 </div>
 
                 <div className="space-y-0.5">
-                  {(['STUDENT', 'MENTOR', 'HOD', 'ADMIN'] as UserRole[]).map((role) => (
+                  {((currentUser?.role === 'ADMIN'
+                    ? ['ADMIN', 'HOD', 'MENTOR', 'STUDENT']
+                    : currentUser?.role === 'HOD'
+                    ? ['HOD', 'MENTOR', 'STUDENT']
+                    : ['MENTOR', 'STUDENT']) as UserRole[]).map((role) => (
                     <button
                       key={role}
                       onClick={() => handleSwitchRole(role)}
@@ -226,7 +230,7 @@ export const Header: React.FC<HeaderProps> = ({ title = 'InternTrack', showBack 
             )}
 
             <div className="border-t border-outline-variant/30 mt-1.5 pt-1 space-y-1">
-              {currentUser?.role !== 'STUDENT' && (
+              {currentUser?.role === 'ADMIN' && (
                 <button
                   id="header-menu-geofence"
                   onClick={() => {

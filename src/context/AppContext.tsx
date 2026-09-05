@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import {
   Student,
   StudentScheduleEntry,
@@ -249,43 +249,63 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [selectedStudentRegisterNumber, setSelectedStudentState] = useState<string | null>('23UCCT001');
   const [selectedAlertId, setSelectedAlert] = useState<string | null>('alert_lourdhe_01');
 
-  // Guarded setCurrentScreen preventing unauthorized access to Admin screens
+  // Guarded setCurrentScreen strictly enforcing role hierarchy access
   const setCurrentScreen = (screen: string) => {
     if (screen === 'login' || !currentUser) {
       setRawCurrentScreen('login');
       return;
     }
 
-    const ADMIN_ONLY_SCREENS = new Set([
-      'admin_dashboard',
-      'admin_hods',
-      'admin_mentors',
-      'admin_students',
-      'admin_shifts',
-      'admin_change_shift',
-      'admin_internships',
-      'admin_attendance',
-      'admin_gps_monitoring',
-      'admin_alerts',
-      'admin_reports',
-      'admin_activity_log',
-      'geofence_setup',
+    const STUDENT_ALLOWED = new Set([
+      'student_dashboard',
+      'active_shift',
+      'verification_result',
+      'verification_result_needs_attention',
+      'gps_history',
+      'student_attendance',
+      'student_profile',
+      'student_notifications',
     ]);
 
-    if (currentUser.role === 'HOD') {
-      if (ADMIN_ONLY_SCREENS.has(screen)) {
-        console.warn(`[Access Denied] HOD (${currentUser.id}) cannot access Admin screen "${screen}". Redirecting to HOD Dashboard.`);
-        setRawCurrentScreen('hod_dashboard');
+    const MENTOR_ALLOWED = new Set([
+      'mentor_dashboard',
+      'mentor_review_arun_kumar',
+      'mentor_student_details',
+      'mentor_students',
+      'mentor_active_shifts',
+      'mentor_attendance',
+      'mentor_notifications',
+      ...STUDENT_ALLOWED,
+    ]);
+
+    const HOD_ALLOWED = new Set([
+      'hod_dashboard',
+      'department_alerts',
+      'hod_alerts',
+      'hod_students',
+      'department_students',
+      'hod_mentors',
+      'hod_gps_monitoring',
+      'hod_analytics_dashboard',
+      ...MENTOR_ALLOWED,
+    ]);
+
+    if (currentUser.role === 'STUDENT') {
+      if (!STUDENT_ALLOWED.has(screen)) {
+        console.warn(`[Access Denied] Student (${currentUser.id}) cannot access screen "${screen}". Redirecting to Student Dashboard.`);
+        setRawCurrentScreen('student_dashboard');
         return;
       }
     } else if (currentUser.role === 'MENTOR') {
-      if (ADMIN_ONLY_SCREENS.has(screen)) {
+      if (!MENTOR_ALLOWED.has(screen)) {
+        console.warn(`[Access Denied] Mentor (${currentUser.id}) cannot access screen "${screen}". Redirecting to Mentor Dashboard.`);
         setRawCurrentScreen('mentor_dashboard');
         return;
       }
-    } else if (currentUser.role === 'STUDENT') {
-      if (ADMIN_ONLY_SCREENS.has(screen)) {
-        setRawCurrentScreen('student_dashboard');
+    } else if (currentUser.role === 'HOD') {
+      if (!HOD_ALLOWED.has(screen)) {
+        console.warn(`[Access Denied] HOD (${currentUser.id}) cannot access screen "${screen}". Redirecting to HOD Dashboard.`);
+        setRawCurrentScreen('hod_dashboard');
         return;
       }
     }
@@ -556,6 +576,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const switchRoleQuickly = (role: UserRole) => {
+    if (currentUser) {
+      const ROLE_RANK: Record<UserRole, number> = {
+        STUDENT: 1,
+        MENTOR: 2,
+        HOD: 3,
+        ADMIN: 4,
+      };
+      if (ROLE_RANK[role] > ROLE_RANK[currentUser.role]) {
+        console.warn(`[Access Denied] User with role ${currentUser.role} cannot switch upward to ${role}.`);
+        return;
+      }
+    }
+
     if (role === 'STUDENT') {
       setCurrentUser(DEMO_USERS['23UCCT001']);
       setSelectedStudent('23UCCT001');
@@ -855,7 +888,44 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const getMentorStudents = (mentorId?: string): Student[] => {
-    const targetMentorId = mentorId || currentUser?.id || 'mentor01';
+    if (!currentUser) return [];
+
+    // STUDENT: Only access own record
+    if (currentUser.role === 'STUDENT') {
+      const ownReg = currentUser.registerNumber || currentUser.id;
+      return students.filter((s) => s.register_number.toLowerCase() === ownReg.toLowerCase());
+    }
+
+    // MENTOR: Can only view their own assigned students
+    if (currentUser.role === 'MENTOR') {
+      return students.filter(
+        (s) =>
+          s.mentor_id === currentUser.id ||
+          s.mentor_name?.toLowerCase() === currentUser.name?.toLowerCase()
+      );
+    }
+
+    // HOD: Can view students of mentors within their department
+    if (currentUser.role === 'HOD') {
+      const deptMentors = mentors
+        .filter((m) => m.department.toLowerCase().trim() === currentUser.department.toLowerCase().trim())
+        .map((m) => m.id);
+      
+      const targetMentorId = mentorId || currentUser.id;
+      if (deptMentors.includes(targetMentorId) || targetMentorId === currentUser.id) {
+        return students.filter(
+          (s) =>
+            (s.mentor_id === targetMentorId || s.department.toLowerCase().trim() === currentUser.department.toLowerCase().trim()) &&
+            s.department.toLowerCase().trim() === currentUser.department.toLowerCase().trim()
+        );
+      }
+      return students.filter(
+        (s) => s.department.toLowerCase().trim() === currentUser.department.toLowerCase().trim()
+      );
+    }
+
+    // ADMIN: Full access to any mentor's students
+    const targetMentorId = mentorId || currentUser.id || 'mentor01';
     return students.filter((s) => s.mentor_id === targetMentorId);
   };
 
@@ -873,7 +943,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     shift_time: string;
     is_night_shift: boolean;
   }): { success: boolean; message: string } => {
-    // RBAC Security check: Enforce mentor's own identity and department
+    // RBAC Security check: Only MENTOR, HOD, and ADMIN can register students
+    if (currentUser?.role === 'STUDENT') {
+      return { success: false, message: 'Unauthorized: Students cannot enroll or register students.' };
+    }
+
     const mentorId = currentUser?.id || 'mentor01';
     const mentorName = currentUser?.name || 'Dr. Anitha';
     const mentorDept = currentUser?.department || 'Physiotherapy';
@@ -941,6 +1015,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const openHodAddMentorModal = () => {
+    if (currentUser?.role === 'STUDENT' || currentUser?.role === 'MENTOR') return;
     setIsHodAddMentorModalOpen(true);
   };
 
@@ -949,30 +1024,134 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const getDepartmentStudents = (dept?: string): Student[] => {
-    const targetDept = dept || currentUser?.department || 'Physiotherapy';
+    if (!currentUser) return [];
+
+    // STUDENT: Only access own record
+    if (currentUser.role === 'STUDENT') {
+      const ownReg = currentUser.registerNumber || currentUser.id;
+      return students.filter((s) => s.register_number.toLowerCase() === ownReg.toLowerCase());
+    }
+
+    // MENTOR: Can only view their assigned students
+    if (currentUser.role === 'MENTOR') {
+      return students.filter(
+        (s) =>
+          s.mentor_id === currentUser.id ||
+          s.mentor_name?.toLowerCase() === currentUser.name?.toLowerCase()
+      );
+    }
+
+    // HOD: Locked strictly to HOD's own department
+    if (currentUser.role === 'HOD') {
+      const targetDept = currentUser.department || 'Physiotherapy';
+      return students.filter(
+        (s) => s.department.toLowerCase().trim() === targetDept.toLowerCase().trim()
+      );
+    }
+
+    // ADMIN: System-wide or specific requested department
+    const targetDept = dept || currentUser.department || 'Physiotherapy';
     return students.filter(
-      (s) => s.department.toLowerCase().trim() === targetDept.toLowerCase().trim()
+      (s) => !dept || s.department.toLowerCase().trim() === targetDept.toLowerCase().trim()
     );
   };
 
   const getDepartmentMentors = (dept?: string): Mentor[] => {
-    const targetDept = dept || currentUser?.department || 'Physiotherapy';
+    if (!currentUser) return [];
+
+    // STUDENT: Cannot access mentor list
+    if (currentUser.role === 'STUDENT') {
+      return [];
+    }
+
+    // MENTOR: Only own mentor record
+    if (currentUser.role === 'MENTOR') {
+      return mentors.filter((m) => m.id === currentUser.id);
+    }
+
+    // HOD: Mentors belonging strictly to HOD's department
+    if (currentUser.role === 'HOD') {
+      const targetDept = currentUser.department || 'Physiotherapy';
+      return mentors.filter(
+        (m) => m.department.toLowerCase().trim() === targetDept.toLowerCase().trim()
+      );
+    }
+
+    // ADMIN: Full system access
+    const targetDept = dept || currentUser.department || 'Physiotherapy';
     return mentors.filter(
-      (m) => m.department.toLowerCase().trim() === targetDept.toLowerCase().trim()
+      (m) => !dept || m.department.toLowerCase().trim() === targetDept.toLowerCase().trim()
     );
   };
 
   const getDepartmentAlerts = (dept?: string): DepartmentAlert[] => {
-    const targetDept = dept || currentUser?.department || 'Physiotherapy';
+    if (!currentUser) return [];
+
+    // STUDENT: Cannot access alerts
+    if (currentUser.role === 'STUDENT') {
+      return [];
+    }
+
+    // MENTOR: Only alerts for assigned students
+    if (currentUser.role === 'MENTOR') {
+      const assignedRegs = students
+        .filter(
+          (s) =>
+            s.mentor_id === currentUser.id ||
+            s.mentor_name?.toLowerCase() === currentUser.name?.toLowerCase()
+        )
+        .map((s) => s.register_number.toLowerCase());
+      return alerts.filter((a) => assignedRegs.includes(a.register_number.toLowerCase()));
+    }
+
+    // HOD: Alerts strictly for HOD's department
+    if (currentUser.role === 'HOD') {
+      const targetDept = currentUser.department || 'Physiotherapy';
+      return alerts.filter(
+        (a) => a.department.toLowerCase().trim() === targetDept.toLowerCase().trim()
+      );
+    }
+
+    // ADMIN: Full system access
+    const targetDept = dept || currentUser.department || 'Physiotherapy';
     return alerts.filter(
-      (a) => a.department.toLowerCase().trim() === targetDept.toLowerCase().trim()
+      (a) => !dept || a.department.toLowerCase().trim() === targetDept.toLowerCase().trim()
     );
   };
 
   const getDepartmentVerifications = (dept?: string): GpsVerification[] => {
-    const targetDept = dept || currentUser?.department || 'Physiotherapy';
+    if (!currentUser) return [];
+
+    // STUDENT: Only own verifications
+    if (currentUser.role === 'STUDENT') {
+      const ownReg = currentUser.registerNumber || currentUser.id;
+      return verifications.filter((v) => v.register_number.toLowerCase() === ownReg.toLowerCase());
+    }
+
+    // MENTOR: Only verifications for assigned students
+    if (currentUser.role === 'MENTOR') {
+      const assignedRegs = students
+        .filter(
+          (s) =>
+            s.mentor_id === currentUser.id ||
+            s.mentor_name?.toLowerCase() === currentUser.name?.toLowerCase()
+        )
+        .map((s) => s.register_number.toLowerCase());
+      return verifications.filter((v) => assignedRegs.includes(v.register_number.toLowerCase()));
+    }
+
+    // HOD: Verifications strictly for HOD's department
+    if (currentUser.role === 'HOD') {
+      const targetDept = currentUser.department || 'Physiotherapy';
+      return verifications.filter(
+        (v) => v.department.toLowerCase().trim() === targetDept.toLowerCase().trim()
+      );
+    }
+
+    // ADMIN: Full system access
+    const targetDept = dept || currentUser.department || 'Physiotherapy';
     return verifications.filter(
-      (v) => v.department.toLowerCase().trim() === targetDept.toLowerCase().trim()
+      (v) => !dept || v.department.toLowerCase().trim() === targetDept.toLowerCase().trim()
     );
   };
 
@@ -983,7 +1162,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     phone?: string;
     title?: string;
   }): { success: boolean; message: string } => {
-    // RBAC Security check: Department is strictly locked to HOD's own department
+    // RBAC Security check: Only HOD and ADMIN can create mentors
+    if (currentUser?.role === 'STUDENT' || currentUser?.role === 'MENTOR') {
+      return { success: false, message: 'Unauthorized: Only Head of Department or Administrators can create mentors.' };
+    }
+
     const hodDept = currentUser?.department || 'Physiotherapy';
     const hodName = currentUser?.name || 'Dr. Sarah Mitchell';
     const hodId = currentUser?.id || 'hod01';
@@ -1022,6 +1205,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const markAlertAsReviewed = (alertId: string, notes: string) => {
+    if (currentUser?.role === 'STUDENT') {
+      console.warn('[Access Denied] Students cannot review alerts.');
+      return;
+    }
+
     const reviewer = currentUser?.name || 'Dr. Anitha (Clinical Supervisor)';
     const timeStr = MockGpsService.getCurrentTimeString();
 
@@ -1829,20 +2017,135 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
+  // ==========================================
+  // SCOPED DATA ARRAYS BASED ON USER ROLE
+  // ==========================================
+  const scopedStudents = useMemo(() => {
+    if (!currentUser) return [];
+    if (currentUser.role === 'ADMIN') return students;
+    if (currentUser.role === 'HOD') {
+      const dept = (currentUser.department || 'Physiotherapy').toLowerCase().trim();
+      return students.filter((s) => s.department.toLowerCase().trim() === dept);
+    }
+    if (currentUser.role === 'MENTOR') {
+      return students.filter(
+        (s) =>
+          s.mentor_id === currentUser.id ||
+          s.mentor_name?.toLowerCase() === currentUser.name?.toLowerCase()
+      );
+    }
+    // STUDENT: Only own student record
+    const ownReg = (currentUser.registerNumber || currentUser.id).toLowerCase().trim();
+    return students.filter((s) => s.register_number.toLowerCase().trim() === ownReg);
+  }, [students, currentUser]);
+
+  const scopedMentors = useMemo(() => {
+    if (!currentUser) return [];
+    if (currentUser.role === 'ADMIN') return mentors;
+    if (currentUser.role === 'HOD') {
+      const dept = (currentUser.department || 'Physiotherapy').toLowerCase().trim();
+      return mentors.filter((m) => m.department.toLowerCase().trim() === dept);
+    }
+    if (currentUser.role === 'MENTOR') {
+      return mentors.filter((m) => m.id === currentUser.id);
+    }
+    // STUDENT: No mentors list access
+    return [];
+  }, [mentors, currentUser]);
+
+  const scopedHods = useMemo(() => {
+    if (!currentUser) return [];
+    if (currentUser.role === 'ADMIN') return hods;
+    if (currentUser.role === 'HOD') {
+      const dept = (currentUser.department || 'Physiotherapy').toLowerCase().trim();
+      return hods.filter((h) => h.department.toLowerCase().trim() === dept);
+    }
+    // MENTOR, STUDENT: No HOD list access
+    return [];
+  }, [hods, currentUser]);
+
+  const scopedAlerts = useMemo(() => {
+    if (!currentUser) return [];
+    if (currentUser.role === 'ADMIN') return alerts;
+    if (currentUser.role === 'HOD') {
+      const dept = (currentUser.department || 'Physiotherapy').toLowerCase().trim();
+      return alerts.filter((a) => a.department.toLowerCase().trim() === dept);
+    }
+    if (currentUser.role === 'MENTOR') {
+      const assignedRegs = students
+        .filter(
+          (s) =>
+            s.mentor_id === currentUser.id ||
+            s.mentor_name?.toLowerCase() === currentUser.name?.toLowerCase()
+        )
+        .map((s) => s.register_number.toLowerCase());
+      return alerts.filter((a) => assignedRegs.includes(a.register_number.toLowerCase()));
+    }
+    // STUDENT: No alerts access
+    return [];
+  }, [alerts, students, currentUser]);
+
+  const scopedVerifications = useMemo(() => {
+    if (!currentUser) return [];
+    if (currentUser.role === 'ADMIN') return verifications;
+    if (currentUser.role === 'HOD') {
+      const dept = (currentUser.department || 'Physiotherapy').toLowerCase().trim();
+      return verifications.filter((v) => v.department.toLowerCase().trim() === dept);
+    }
+    if (currentUser.role === 'MENTOR') {
+      const assignedRegs = students
+        .filter(
+          (s) =>
+            s.mentor_id === currentUser.id ||
+            s.mentor_name?.toLowerCase() === currentUser.name?.toLowerCase()
+        )
+        .map((s) => s.register_number.toLowerCase());
+      return verifications.filter((v) => assignedRegs.includes(v.register_number.toLowerCase()));
+    }
+    // STUDENT: Only own verifications
+    const ownReg = (currentUser.registerNumber || currentUser.id).toLowerCase().trim();
+    return verifications.filter((v) => v.register_number.toLowerCase().trim() === ownReg);
+  }, [verifications, students, currentUser]);
+
+  const scopedAttendanceRecords = useMemo(() => {
+    if (!currentUser) return [];
+    if (currentUser.role === 'ADMIN') return attendanceRecords;
+    if (currentUser.role === 'HOD') {
+      const dept = (currentUser.department || 'Physiotherapy').toLowerCase().trim();
+      const deptRegs = students
+        .filter((s) => s.department.toLowerCase().trim() === dept)
+        .map((s) => s.register_number.toLowerCase());
+      return attendanceRecords.filter((r) => deptRegs.includes(r.register_number.toLowerCase()));
+    }
+    if (currentUser.role === 'MENTOR') {
+      const assignedRegs = students
+        .filter(
+          (s) =>
+            s.mentor_id === currentUser.id ||
+            s.mentor_name?.toLowerCase() === currentUser.name?.toLowerCase()
+        )
+        .map((s) => s.register_number.toLowerCase());
+      return attendanceRecords.filter((r) => assignedRegs.includes(r.register_number.toLowerCase()));
+    }
+    // STUDENT: Only own attendance records
+    const ownReg = (currentUser.registerNumber || currentUser.id).toLowerCase().trim();
+    return attendanceRecords.filter((r) => r.register_number.toLowerCase().trim() === ownReg);
+  }, [attendanceRecords, students, currentUser]);
+
   return (
     <AppContext.Provider
       value={{
         currentUser,
         currentRole: currentUser?.role || null,
-        students,
-        mentors,
-        hods,
+        students: scopedStudents,
+        mentors: scopedMentors,
+        hods: scopedHods,
         departments,
         shifts,
-        verifications,
-        alerts,
+        verifications: scopedVerifications,
+        alerts: scopedAlerts,
         activityLogs: currentUser?.role === 'ADMIN' ? activityLogs : [],
-        attendanceRecords,
+        attendanceRecords: scopedAttendanceRecords,
         studentNotifications,
         mentorNotifications,
         gpsMode,

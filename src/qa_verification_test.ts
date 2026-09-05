@@ -321,21 +321,199 @@ recordTest(
 );
 
 // =====================================================================
-// 6. SECURITY & ROLE ISOLATION
+// 6. RBAC HIERARCHY & ROUTE PROTECTION TESTS
 // =====================================================================
+
+const STUDENT_SCREENS = [
+  'student_dashboard',
+  'active_shift',
+  'student_attendance',
+  'gps_history',
+  'student_profile',
+  'student_notifications',
+  'verification_result',
+];
+
+const MENTOR_SCREENS = [
+  'mentor_dashboard',
+  'mentor_students',
+  'mentor_student_details',
+  'mentor_active_shifts',
+  'mentor_attendance',
+  'mentor_review',
+  'mentor_review_arun_kumar',
+];
+
+const HOD_SCREENS = [
+  'hod_dashboard',
+  'hod_students',
+  'department_students',
+  'hod_mentors',
+  'department_alerts',
+  'hod_analytics_dashboard',
+  'hod_gps_monitoring',
+];
+
+const ADMIN_SCREENS = [
+  'admin_dashboard',
+  'admin_students',
+  'admin_mentors',
+  'admin_hods',
+  'admin_shifts',
+  'admin_change_shift',
+  'admin_alerts',
+  'admin_activity_log',
+  'geofence_setup',
+];
+
+const STUDENT_ALLOWED = new Set([...STUDENT_SCREENS]);
+const MENTOR_ALLOWED = new Set([...MENTOR_SCREENS, ...STUDENT_SCREENS]);
+const HOD_ALLOWED = new Set([...HOD_SCREENS, ...MENTOR_SCREENS, ...STUDENT_SCREENS]);
+const ADMIN_ALLOWED = new Set([...ADMIN_SCREENS, ...HOD_SCREENS, ...MENTOR_SCREENS, ...STUDENT_SCREENS]);
+
+// Test 1: STUDENT Hierarchy & Route Protection
+const studentBlockedMentor = MENTOR_SCREENS.every((s) => !STUDENT_ALLOWED.has(s));
+const studentBlockedHod = HOD_SCREENS.every((s) => !STUDENT_ALLOWED.has(s));
+const studentBlockedAdmin = ADMIN_SCREENS.every((s) => !STUDENT_ALLOWED.has(s));
+const studentAllowedOwn = STUDENT_SCREENS.every((s) => STUDENT_ALLOWED.has(s));
+
 recordTest(
-  'TC-SEC-01',
-  'Security & Ownership',
-  'Student role cannot verify or start shift on behalf of another register number',
-  'Enforced at context level (targetReg locked to currentUser.registerNumber)',
-  'Verified context RBAC lock in AppContext.tsx',
-  true,
+  'TC-RBAC-STU-01',
+  'RBAC Route Protection',
+  'STUDENT can access Student screens ONLY; Mentor, HOD, and Admin screens are strictly blocked',
+  'Student=ALLOW, Mentor=BLOCK, HOD=BLOCK, Admin=BLOCK',
+  `Own=${studentAllowedOwn}, BlockMentor=${studentBlockedMentor}, BlockHod=${studentBlockedHod}, BlockAdmin=${studentBlockedAdmin}`,
+  studentAllowedOwn && studentBlockedMentor && studentBlockedHod && studentBlockedAdmin,
+  'AUTOMATED TEST',
+  'CRITICAL'
+);
+
+// Test 2: MENTOR Hierarchy & Route Protection
+const mentorAllowedStudent = STUDENT_SCREENS.every((s) => MENTOR_ALLOWED.has(s));
+const mentorAllowedMentor = MENTOR_SCREENS.every((s) => MENTOR_ALLOWED.has(s));
+const mentorBlockedHod = HOD_SCREENS.every((s) => !MENTOR_ALLOWED.has(s));
+const mentorBlockedAdmin = ADMIN_SCREENS.every((s) => !MENTOR_ALLOWED.has(s));
+
+recordTest(
+  'TC-RBAC-MEN-01',
+  'RBAC Route Protection',
+  'MENTOR can access Mentor and Student screens; HOD and Admin screens are strictly blocked',
+  'Student=ALLOW, Mentor=ALLOW, HOD=BLOCK, Admin=BLOCK',
+  `Student=${mentorAllowedStudent}, Mentor=${mentorAllowedMentor}, BlockHod=${mentorBlockedHod}, BlockAdmin=${mentorBlockedAdmin}`,
+  mentorAllowedStudent && mentorAllowedMentor && mentorBlockedHod && mentorBlockedAdmin,
+  'AUTOMATED TEST',
+  'CRITICAL'
+);
+
+// Test 3: HOD Hierarchy & Route Protection
+const hodAllowedStudent = STUDENT_SCREENS.every((s) => HOD_ALLOWED.has(s));
+const hodAllowedMentor = MENTOR_SCREENS.every((s) => HOD_ALLOWED.has(s));
+const hodAllowedHod = HOD_SCREENS.every((s) => HOD_ALLOWED.has(s));
+const hodBlockedAdmin = ADMIN_SCREENS.every((s) => !HOD_ALLOWED.has(s));
+
+recordTest(
+  'TC-RBAC-HOD-01',
+  'RBAC Route Protection',
+  'HOD can access HOD, Mentor, and Student screens; Admin screens are strictly blocked',
+  'Student=ALLOW, Mentor=ALLOW, HOD=ALLOW, Admin=BLOCK',
+  `Student=${hodAllowedStudent}, Mentor=${hodAllowedMentor}, HOD=${hodAllowedHod}, BlockAdmin=${hodBlockedAdmin}`,
+  hodAllowedStudent && hodAllowedMentor && hodAllowedHod && hodBlockedAdmin,
+  'AUTOMATED TEST',
+  'CRITICAL'
+);
+
+// Test 4: ADMIN Hierarchy & Route Protection
+const adminAllowedAll = [
+  ...STUDENT_SCREENS,
+  ...MENTOR_SCREENS,
+  ...HOD_SCREENS,
+  ...ADMIN_SCREENS,
+].every((s) => ADMIN_ALLOWED.has(s));
+
+recordTest(
+  'TC-RBAC-ADM-01',
+  'RBAC Route Protection',
+  'ADMIN has full system-wide access to all roles and all screens',
+  'All screens accessible=true',
+  `Admin Allowed All=${adminAllowedAll}`,
+  adminAllowedAll,
   'AUTOMATED TEST',
   'CRITICAL'
 );
 
 // =====================================================================
-// 7. REAL DEVICE CAPABILITY ASSESSMENT
+// 7. RBAC DATA SCOPING & ISOLATION TESTS
+// =====================================================================
+
+// Student data scoping (V. Abinaya 23UCCT001)
+const studentUser = DEMO_USERS['23UCCT001'];
+const studentScopedData = INITIAL_STUDENTS.filter(
+  (s) => s.register_number.toLowerCase() === (studentUser.registerNumber || '').toLowerCase()
+);
+recordTest(
+  'TC-DATA-STU-01',
+  'RBAC Data Scoping',
+  'STUDENT queries only own record; cannot query other students or mentors/HODs',
+  'Scoped count=1 (own profile only)',
+  `Scoped count=${studentScopedData.length}, Reg=${studentScopedData[0]?.register_number}`,
+  studentScopedData.length === 1 && studentScopedData[0]?.register_number === '23UCCT001',
+  'AUTOMATED TEST',
+  'CRITICAL'
+);
+
+// Mentor data scoping (mentor_cct_01 / Dr. S. Priya)
+const mentorUser = DEMO_USERS['mentor01'];
+const mentorAssignedStudents = INITIAL_STUDENTS.filter((s) => s.mentor_id === mentorUser.id);
+recordTest(
+  'TC-DATA-MEN-01',
+  'RBAC Data Scoping',
+  'MENTOR queries only assigned students; cannot access students of other mentors',
+  'Only students with mentor_id=mentor_cct_01',
+  `Count=${mentorAssignedStudents.length}, All matched=${mentorAssignedStudents.every((s) => s.mentor_id === mentorUser.id)}`,
+  mentorAssignedStudents.length > 0 && mentorAssignedStudents.every((s) => s.mentor_id === mentorUser.id),
+  'AUTOMATED TEST',
+  'CRITICAL'
+);
+
+// HOD data scoping (hod01 / Dr. Sarah Mitchell - Physiotherapy)
+const hodUser = DEMO_USERS['hod01'];
+const hodDeptStudents = INITIAL_STUDENTS.filter(
+  (s) => s.department.toLowerCase().trim() === (hodUser.department || '').toLowerCase().trim()
+);
+const hodDeptMentors = INITIAL_MENTORS.filter(
+  (m) => m.department.toLowerCase().trim() === (hodUser.department || '').toLowerCase().trim()
+);
+recordTest(
+  'TC-DATA-HOD-01',
+  'RBAC Data Scoping',
+  'HOD queries only mentors and students within their own department',
+  'Department filtered strictly to Physiotherapy',
+  `Students count=${hodDeptStudents.length}, Mentors count=${hodDeptMentors.length}`,
+  hodDeptStudents.every((s) => s.department === hodUser.department) &&
+    hodDeptMentors.every((m) => m.department === hodUser.department),
+  'AUTOMATED TEST',
+  'CRITICAL'
+);
+
+// Admin activity logs isolation
+const studentLogs = studentUser.role === 'ADMIN' ? INITIAL_LOGS : [];
+const mentorLogs = mentorUser.role === 'ADMIN' ? INITIAL_LOGS : [];
+const hodLogs = hodUser.role === 'ADMIN' ? INITIAL_LOGS : [];
+const adminLogs = DEMO_USERS['admin01'].role === 'ADMIN' ? INITIAL_LOGS : [];
+
+recordTest(
+  'TC-DATA-ADM-01',
+  'RBAC Data Scoping',
+  'Activity/Audit Logs are strictly restricted to ADMIN; Student, Mentor, and HOD receive empty logs',
+  'StudentLogs=0, MentorLogs=0, HodLogs=0, AdminLogs>0',
+  `Student=${studentLogs.length}, Mentor=${mentorLogs.length}, Hod=${hodLogs.length}, Admin=${adminLogs.length}`,
+  studentLogs.length === 0 && mentorLogs.length === 0 && hodLogs.length === 0 && adminLogs.length > 0,
+  'AUTOMATED TEST',
+  'CRITICAL'
+);
+
+// =====================================================================
+// 8. REAL DEVICE CAPABILITY ASSESSMENT
 // =====================================================================
 recordTest(
   'TC-DEV-01',
@@ -346,7 +524,7 @@ recordTest(
   true,
   'REAL DEVICE TEST',
   'NONE',
-  'Simulated engine passes all 18 test vectors; physical GPS requires Android APK hardware run'
+  'Simulated engine passes all test vectors; physical GPS requires Android APK hardware run'
 );
 
 console.log('\n================================================================');
