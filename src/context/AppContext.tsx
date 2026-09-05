@@ -36,7 +36,7 @@ import {
   INITIAL_SHIFT_SESSIONS,
   INITIAL_SCHEDULED_CHECKS,
 } from '../services/mockData';
-import { MockGpsService } from '../services/mockGpsService';
+import { MockGpsService, GPS_ACCURACY_THRESHOLD_METERS } from '../services/mockGpsService';
 
 export interface CheckOutSummaryData {
   startTime: string;
@@ -519,16 +519,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [hospitalGeofence]);
 
   const updateHospitalGeofence = (newConfig: Partial<HospitalGeofence>, reason = 'Institutional geofence recalibration') => {
-    if (currentUser?.role !== 'ADMIN') {
+    if (currentUser?.role !== 'ADMIN' && currentUser?.role !== 'HOD') {
       console.warn(`[Access Denied] User with role ${currentUser?.role} is not authorized to modify Hospital Geofence.`);
       return;
     }
+
+    const updaterName = currentUser?.name 
+      ? `${currentUser.name}${currentUser.role === 'HOD' ? ` (HOD - ${currentUser.department || 'Dept'})` : ''}`
+      : 'Hospital Administration';
 
     const updated: HospitalGeofence = {
       ...hospitalGeofence,
       ...newConfig,
       last_updated_at: new Date().toISOString().replace('T', ' ').substring(0, 16),
-      updated_by: currentUser?.name || 'Hospital Administration',
+      updated_by: updaterName,
     };
 
     setHospitalGeofence(updated);
@@ -552,16 +556,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       student_name: 'All Interns',
       details: `Geofence perimeter set to ${updated.radius_meters}m around (${updated.latitude.toFixed(4)}, ${updated.longitude.toFixed(4)}) - "${updated.name}"`,
       reason,
-      performed_by: currentUser?.name || 'Hospital Administration',
+      performed_by: updaterName,
     };
     setActivityLogs((prev) => [logEntry, ...prev]);
   };
 
   const resetHospitalGeofence = () => {
-    if (currentUser?.role !== 'ADMIN') {
+    if (currentUser?.role !== 'ADMIN' && currentUser?.role !== 'HOD') {
       console.warn(`[Access Denied] User with role ${currentUser?.role} is not authorized to reset Hospital Geofence.`);
       return;
     }
+
+    const updaterName = currentUser?.name 
+      ? `${currentUser.name}${currentUser.role === 'HOD' ? ` (HOD - ${currentUser.department || 'Dept'})` : ''}`
+      : 'Hospital Administration';
 
     setHospitalGeofence(HOSPITAL_CONFIG);
     MockGpsService.setActiveGeofence(HOSPITAL_CONFIG);
@@ -579,7 +587,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       student_name: 'All Interns',
       details: `Geofence restored to default 150m perimeter (${HOSPITAL_CONFIG.name})`,
       reason: 'Factory reset to default institutional boundaries',
-      performed_by: currentUser?.name || 'Hospital Administration',
+      performed_by: updaterName,
     };
     setActivityLogs((prev) => [logEntry, ...prev]);
   };

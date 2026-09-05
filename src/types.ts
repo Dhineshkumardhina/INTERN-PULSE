@@ -125,7 +125,7 @@ export interface ScheduledRandomCheck {
   check_number: 1 | 2 | 3 | 4 | 5;
   scheduled_time: string; // "HH:MM" e.g. "10:48 PM"
   scheduled_datetime: string; // full ISO-8601 string
-  status: 'SCHEDULED' | 'EXECUTING' | 'VERIFIED' | 'NEEDS ATTENTION' | 'GPS UNAVAILABLE' | 'PERMISSION DENIED' | 'LOW ACCURACY' | 'MISSED' | 'COMPLETED';
+  status: 'SCHEDULED' | 'EXECUTING' | 'MISSED' | 'COMPLETED' | VerificationStatus;
   executed_at?: string;
   latitude?: number;
   longitude?: number;

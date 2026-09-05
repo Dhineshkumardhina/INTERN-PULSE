@@ -165,9 +165,10 @@ export const GeofenceSettingsScreen: React.FC = () => {
           <button
             id="btn-geofence-back"
             onClick={() => {
-              if (currentRole === 'ADMIN') setCurrentScreen('admin_dashboard');
-              else if (currentRole === 'HOD') setCurrentScreen('hod_dashboard');
-              else if (currentRole === 'MENTOR') setCurrentScreen('mentor_dashboard');
+              const role = currentUser?.role || currentRole;
+              if (role === 'ADMIN') setCurrentScreen('admin_dashboard');
+              else if (role === 'HOD') setCurrentScreen('hod_dashboard');
+              else if (role === 'MENTOR') setCurrentScreen('mentor_dashboard');
               else setCurrentScreen('student_dashboard');
             }}
             className="flex items-center gap-1 text-xs font-semibold text-primary bg-primary/10 px-2.5 py-1.5 rounded-lg cursor-pointer hover:bg-primary/20 transition-all"

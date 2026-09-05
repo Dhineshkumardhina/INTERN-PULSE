@@ -5,6 +5,7 @@ import { Header } from '../common/Header';
 export const HodGpsMonitoringScreen: React.FC = () => {
   const {
     currentUser,
+    hospitalGeofence,
     getDepartmentVerifications,
     getDepartmentStudents,
     setSelectedStudent,
@@ -40,6 +41,34 @@ export const HodGpsMonitoringScreen: React.FC = () => {
       />
 
       <main className="p-3.5 space-y-3.5 flex-1 min-w-0">
+        {/* Geofence Perimeter Quick Action & Calibration Banner */}
+        <div className="p-3 bg-surface-container-lowest rounded-2xl border border-primary/30 flex items-center justify-between gap-2.5 shadow-2xs">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
+              <span className="material-symbols-outlined text-[18px]">share_location</span>
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="font-bold text-xs text-on-surface">Campus Geofence</span>
+                <span className="font-mono text-[10px] font-bold bg-primary text-on-primary px-1.5 py-0.2 rounded">
+                  {hospitalGeofence.radius_meters}m
+                </span>
+              </div>
+              <p className="text-[10px] text-on-surface-variant truncate">
+                {hospitalGeofence.name} • ±{hospitalGeofence.tolerance_meters || 15}m buffer
+              </p>
+            </div>
+          </div>
+          <button
+            id="btn-hod-gps-calibrate-geofence"
+            onClick={() => setCurrentScreen('geofence_setup')}
+            className="px-3 py-1.5 bg-primary text-on-primary font-bold text-xs rounded-xl hover:bg-primary/90 transition-all flex items-center gap-1 cursor-pointer shrink-0 shadow-xs"
+          >
+            <span className="material-symbols-outlined text-[15px]">tune</span>
+            <span>Calibrate</span>
+          </button>
+        </div>
+
         {/* Privacy & Operational Standard Notice */}
         <div className="p-3 bg-secondary/5 rounded-2xl border border-secondary/20 flex items-start gap-2.5 text-xs text-on-surface-variant">
           <span className="material-symbols-outlined text-secondary text-[20px] shrink-0 mt-0.5">

@@ -5,6 +5,7 @@ import { Header } from '../common/Header';
 export const HodDashboard: React.FC = () => {
   const {
     currentUser,
+    hospitalGeofence,
     getDepartmentStudents,
     getDepartmentMentors,
     getDepartmentAlerts,
@@ -74,6 +75,49 @@ export const HodDashboard: React.FC = () => {
             <span className="material-symbols-outlined text-[18px]">person_add</span>
             <span>Add Mentor</span>
           </button>
+        </section>
+
+        {/* Institutional & Department Geofence Configuration Card */}
+        <section
+          id="hod-geofence-banner"
+          className="bg-gradient-to-r from-primary/10 via-surface-container-low to-secondary/10 border border-primary/30 rounded-2xl p-3.5 shadow-2xs relative overflow-hidden"
+        >
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="space-y-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="px-2 py-0.5 bg-primary text-on-primary text-[10px] font-bold rounded-full uppercase tracking-wider flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                  Active Hospital Geofence
+                </span>
+                <span className="text-[11px] font-bold font-mono text-primary bg-primary/10 px-2 py-0.5 rounded-md border border-primary/20">
+                  {hospitalGeofence.radius_meters}m Perimeter
+                </span>
+                <span className="text-[11px] text-on-surface-variant font-medium">
+                  {activeInterns} Active Interns Enforced
+                </span>
+              </div>
+              <h3 className="font-bold text-sm text-on-surface truncate">
+                {hospitalGeofence.name}
+              </h3>
+              <p className="text-[11px] text-on-surface-variant flex items-center gap-1.5 flex-wrap">
+                <span className="material-symbols-outlined text-[14px] text-primary">pin_drop</span>
+                <span>{hospitalGeofence.latitude.toFixed(4)}° N, {hospitalGeofence.longitude.toFixed(4)}° E</span>
+                <span className="text-outline">|</span>
+                <span>Zone: <strong className="text-on-surface">{hospitalGeofence.department_zone || hodDept}</strong></span>
+                <span className="text-outline">|</span>
+                <span>Buffer: ±{hospitalGeofence.tolerance_meters || 15}m</span>
+              </p>
+            </div>
+
+            <button
+              id="btn-hod-config-geofence"
+              onClick={() => setCurrentScreen('geofence_setup')}
+              className="px-3.5 py-2 bg-primary text-on-primary font-bold text-xs rounded-xl hover:bg-primary/90 transition-all flex items-center gap-1.5 cursor-pointer shadow-xs shrink-0"
+            >
+              <span className="material-symbols-outlined text-[16px]">tune</span>
+              <span>Geofence Settings</span>
+            </button>
+          </div>
         </section>
 
         {/* 6 Executive Summary Cards (Exact Prompt Requirement) */}
@@ -222,16 +266,33 @@ export const HodDashboard: React.FC = () => {
           </button>
 
           <button
+            id="btn-hod-module-geofence"
+            onClick={() => setCurrentScreen('geofence_setup')}
+            className="p-3 bg-surface-container-lowest rounded-xl border border-outline-variant/50 hover:border-primary/50 text-left transition-all cursor-pointer flex items-center justify-between shadow-2xs"
+          >
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-700 flex items-center justify-center">
+                <span className="material-symbols-outlined text-[18px]">share_location</span>
+              </div>
+              <div>
+                <div className="font-bold text-xs text-on-surface">Campus Geofence</div>
+                <div className="text-[10px] text-on-surface-variant">{hospitalGeofence.radius_meters}m Perimeter</div>
+              </div>
+            </div>
+            <span className="material-symbols-outlined text-outline-variant text-[16px]">chevron_right</span>
+          </button>
+
+          <button
             onClick={() => setCurrentScreen('hod_analytics_dashboard')}
-            className="p-3 bg-surface-container-lowest rounded-xl border border-outline-variant/50 hover:border-primary/50 text-left transition-all cursor-pointer flex items-center justify-between shadow-2xs col-span-2 sm:col-span-2"
+            className="p-3 bg-surface-container-lowest rounded-xl border border-outline-variant/50 hover:border-primary/50 text-left transition-all cursor-pointer flex items-center justify-between shadow-2xs col-span-2 sm:col-span-1"
           >
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-700 flex items-center justify-center">
                 <span className="material-symbols-outlined text-[18px]">analytics</span>
               </div>
               <div>
-                <div className="font-bold text-xs text-on-surface">Attendance & Internship Reports</div>
-                <div className="text-[10px] text-on-surface-variant">Daily/Weekly/Monthly Attendance, Mentor Workload & Summary</div>
+                <div className="font-bold text-xs text-on-surface">Internship Reports</div>
+                <div className="text-[10px] text-on-surface-variant">Attendance & Workload</div>
               </div>
             </div>
             <span className="material-symbols-outlined text-outline-variant text-[16px]">chevron_right</span>
