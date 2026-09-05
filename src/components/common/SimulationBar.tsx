@@ -72,8 +72,8 @@ export const SimulationBar: React.FC = () => {
 
             {/* Scrollable Content */}
             <div className="p-4 space-y-4 overflow-y-auto text-xs">
-              {/* Geofence Perimeter Quick Launcher (Mentor, HOD, and Admin only) */}
-              {currentUser?.role !== 'STUDENT' && (
+              {/* Geofence Perimeter Quick Launcher (Admin only) */}
+              {currentUser?.role === 'ADMIN' && (
                 <div className="bg-primary/20 border border-primary/40 rounded-xl p-3 flex items-center justify-between">
                   <div className="space-y-0.5">
                     <div className="flex items-center gap-1.5">

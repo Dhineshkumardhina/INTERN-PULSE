@@ -43,6 +43,22 @@ import { BottomNav } from './components/common/BottomNav';
 import { SimulationBar } from './components/common/SimulationBar';
 
 // Allowed screens per role
+const ADMIN_ONLY_SCREENS = new Set([
+  'admin_dashboard',
+  'admin_hods',
+  'admin_mentors',
+  'admin_students',
+  'admin_shifts',
+  'admin_change_shift',
+  'admin_internships',
+  'admin_attendance',
+  'admin_gps_monitoring',
+  'admin_alerts',
+  'admin_reports',
+  'admin_activity_log',
+  'geofence_setup',
+]);
+
 const STUDENT_ALLOWED_SCREENS = new Set([
   'student_dashboard',
   'active_shift',
@@ -67,6 +83,7 @@ const MENTOR_ALLOWED_SCREENS = new Set([
 const HOD_ALLOWED_SCREENS = new Set([
   'hod_dashboard',
   'department_alerts',
+  'hod_alerts',
   'hod_students',
   'department_students',
   'hod_mentors',
@@ -97,7 +114,7 @@ const ADMIN_ALLOWED_SCREENS = new Set([
 ]);
 
 const AppRouter: React.FC = () => {
-  const { currentScreen, currentUser } = useApp();
+  const { currentScreen, currentUser, setCurrentScreen } = useApp();
 
   if (!currentUser || currentScreen === 'login') {
     return (
@@ -113,11 +130,11 @@ const AppRouter: React.FC = () => {
   const isAuthorized = (() => {
     switch (currentUser.role) {
       case 'STUDENT':
-        return STUDENT_ALLOWED_SCREENS.has(currentScreen);
+        return STUDENT_ALLOWED_SCREENS.has(currentScreen) && !ADMIN_ONLY_SCREENS.has(currentScreen);
       case 'MENTOR':
-        return MENTOR_ALLOWED_SCREENS.has(currentScreen);
+        return MENTOR_ALLOWED_SCREENS.has(currentScreen) && !ADMIN_ONLY_SCREENS.has(currentScreen);
       case 'HOD':
-        return HOD_ALLOWED_SCREENS.has(currentScreen);
+        return HOD_ALLOWED_SCREENS.has(currentScreen) && !ADMIN_ONLY_SCREENS.has(currentScreen);
       case 'ADMIN':
         return ADMIN_ALLOWED_SCREENS.has(currentScreen);
       default:
@@ -125,7 +142,20 @@ const AppRouter: React.FC = () => {
     }
   })();
 
-  // Render authorized screen or secure default fallback
+  // Synchronize state if unauthorized route attempted (e.g. HOD attempting direct Admin route)
+  React.useEffect(() => {
+    if (!isAuthorized && currentUser) {
+      if (currentUser.role === 'HOD') {
+        setCurrentScreen('hod_dashboard');
+      } else if (currentUser.role === 'MENTOR') {
+        setCurrentScreen('mentor_dashboard');
+      } else if (currentUser.role === 'STUDENT') {
+        setCurrentScreen('student_dashboard');
+      }
+    }
+  }, [isAuthorized, currentUser, currentScreen, setCurrentScreen]);
+
+  // Render authorized screen or secure default fallback (Do NOT expose any Admin UI/data to HOD)
   const renderScreenContent = () => {
     if (!isAuthorized) {
       // Return safe role-specific dashboard fallback if an unauthorized screen was attempted
@@ -158,7 +188,7 @@ const AppRouter: React.FC = () => {
 
     // HOD Screens
     if (currentScreen === 'hod_dashboard') return <HodDashboard />;
-    if (currentScreen === 'department_alerts') return <DepartmentAlertsScreen />;
+    if (currentScreen === 'department_alerts' || currentScreen === 'hod_alerts') return <DepartmentAlertsScreen />;
     if (currentScreen === 'hod_students' || currentScreen === 'department_students') return <HodStudentsScreen />;
     if (currentScreen === 'hod_mentors') return <HodMentorsScreen />;
     if (currentScreen === 'hod_gps_monitoring') return <HodGpsMonitoringScreen />;

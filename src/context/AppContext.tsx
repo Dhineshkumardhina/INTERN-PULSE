@@ -245,9 +245,53 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [mentorNotifications, setMentorNotifications] = useState<MentorNotification[]>(() => INITIAL_MENTOR_NOTIFICATIONS);
   
   const [gpsMode, setGpsModeState] = useState<GpsSimulationMode>('INSIDE_HOSPITAL');
-  const [currentScreen, setCurrentScreen] = useState<string>('login');
+  const [currentScreen, setRawCurrentScreen] = useState<string>('login');
   const [selectedStudentRegisterNumber, setSelectedStudentState] = useState<string | null>('23UCCT001');
   const [selectedAlertId, setSelectedAlert] = useState<string | null>('alert_lourdhe_01');
+
+  // Guarded setCurrentScreen preventing unauthorized access to Admin screens
+  const setCurrentScreen = (screen: string) => {
+    if (screen === 'login' || !currentUser) {
+      setRawCurrentScreen('login');
+      return;
+    }
+
+    const ADMIN_ONLY_SCREENS = new Set([
+      'admin_dashboard',
+      'admin_hods',
+      'admin_mentors',
+      'admin_students',
+      'admin_shifts',
+      'admin_change_shift',
+      'admin_internships',
+      'admin_attendance',
+      'admin_gps_monitoring',
+      'admin_alerts',
+      'admin_reports',
+      'admin_activity_log',
+      'geofence_setup',
+    ]);
+
+    if (currentUser.role === 'HOD') {
+      if (ADMIN_ONLY_SCREENS.has(screen)) {
+        console.warn(`[Access Denied] HOD (${currentUser.id}) cannot access Admin screen "${screen}". Redirecting to HOD Dashboard.`);
+        setRawCurrentScreen('hod_dashboard');
+        return;
+      }
+    } else if (currentUser.role === 'MENTOR') {
+      if (ADMIN_ONLY_SCREENS.has(screen)) {
+        setRawCurrentScreen('mentor_dashboard');
+        return;
+      }
+    } else if (currentUser.role === 'STUDENT') {
+      if (ADMIN_ONLY_SCREENS.has(screen)) {
+        setRawCurrentScreen('student_dashboard');
+        return;
+      }
+    }
+
+    setRawCurrentScreen(screen);
+  };
 
   // Sync state to localStorage for robust app restart & night-shift continuity
   useEffect(() => {
@@ -350,6 +394,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [hospitalGeofence]);
 
   const updateHospitalGeofence = (newConfig: Partial<HospitalGeofence>, reason = 'Institutional geofence recalibration') => {
+    if (currentUser?.role !== 'ADMIN') {
+      console.warn(`[Access Denied] User with role ${currentUser?.role} is not authorized to modify Hospital Geofence.`);
+      return;
+    }
+
     const updated: HospitalGeofence = {
       ...hospitalGeofence,
       ...newConfig,
@@ -384,6 +433,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const resetHospitalGeofence = () => {
+    if (currentUser?.role !== 'ADMIN') {
+      console.warn(`[Access Denied] User with role ${currentUser?.role} is not authorized to reset Hospital Geofence.`);
+      return;
+    }
+
     setHospitalGeofence(HOSPITAL_CONFIG);
     MockGpsService.setActiveGeofence(HOSPITAL_CONFIG);
     try {
@@ -1047,6 +1101,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     department: string;
     reason?: string;
   }): { success: boolean; message: string } => {
+    if (currentUser?.role !== 'ADMIN') {
+      return { success: false, message: 'Unauthorized: Only Institutional Administrators can create HOD accounts.' };
+    }
+
     const cleanId = data.id.trim().toLowerCase();
     const existing = hods.find((h) => h.id.toLowerCase() === cleanId);
     if (existing) {
@@ -1099,6 +1157,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     data: Partial<Hod>,
     reason: string
   ): { success: boolean; message: string } => {
+    if (currentUser?.role !== 'ADMIN') {
+      return { success: false, message: 'Unauthorized: Only Institutional Administrators can modify HOD accounts.' };
+    }
+
     const existing = hods.find((h) => h.id === id);
     if (!existing) return { success: false, message: 'HOD not found.' };
 
@@ -1130,6 +1192,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const toggleHodStatus = (id: string, reason: string) => {
+    if (currentUser?.role !== 'ADMIN') return;
+
     const existing = hods.find((h) => h.id === id);
     if (!existing) return;
 
@@ -1164,6 +1228,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     department: string;
     reason?: string;
   }): { success: boolean; message: string } => {
+    if (currentUser?.role !== 'ADMIN') {
+      return { success: false, message: 'Unauthorized: Admin privileges required.' };
+    }
+
     const cleanId = data.id.trim().toLowerCase();
     const existing = mentors.find((m) => m.id.toLowerCase() === cleanId);
     if (existing) {
@@ -1209,6 +1277,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     data: Partial<Mentor>,
     reason: string
   ): { success: boolean; message: string } => {
+    if (currentUser?.role !== 'ADMIN') {
+      return { success: false, message: 'Unauthorized: Admin privileges required.' };
+    }
+
     const existing = mentors.find((m) => m.id === id);
     if (!existing) return { success: false, message: 'Mentor not found.' };
 
@@ -1235,6 +1307,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const adminToggleMentorStatus = (id: string, reason: string) => {
+    if (currentUser?.role !== 'ADMIN') return;
+
     const existing = mentors.find((m) => m.id === id);
     if (!existing) return;
 
@@ -1261,6 +1335,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const adminReassignMentorDepartment = (mentorId: string, newDept: string, reason: string) => {
+    if (currentUser?.role !== 'ADMIN') return;
+
     const existing = mentors.find((m) => m.id === mentorId);
     if (!existing) return;
 
@@ -1291,6 +1367,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     data: Partial<Student>,
     reason: string
   ): { success: boolean; message: string } => {
+    if (currentUser?.role !== 'ADMIN') {
+      return { success: false, message: 'Unauthorized: Admin privileges required.' };
+    }
+
     const existing = students.find((s) => s.register_number === regNumber);
     if (!existing) return { success: false, message: 'Student not found.' };
 
@@ -1319,6 +1399,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const adminToggleStudentStatus = (regNumber: string, reason: string) => {
+    if (currentUser?.role !== 'ADMIN') return;
+
     const existing = students.find((s) => s.register_number === regNumber);
     if (!existing) return;
 
@@ -1352,6 +1434,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     newMentorId?: string,
     reason?: string
   ) => {
+    if (currentUser?.role !== 'ADMIN') return;
+
     const student = students.find((s) => s.register_number === regNumber);
     if (!student) return;
 
@@ -1403,6 +1487,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     shiftData: Omit<Shift, 'id'>,
     reason?: string
   ): { success: boolean; message: string } => {
+    if (currentUser?.role !== 'ADMIN') {
+      return { success: false, message: 'Unauthorized: Only Institutional Administrators can create shifts.' };
+    }
+
     const newId = `shift_${Date.now()}`;
     const newShift: Shift = {
       id: newId,
@@ -1434,6 +1522,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     shiftId: string,
     reason: string
   ): { success: boolean; count: number } => {
+    if (currentUser?.role !== 'ADMIN') return { success: false, count: 0 };
+
     const targetShift = shifts.find((sh) => sh.id === shiftId);
     if (!targetShift || studentRegs.length === 0) return { success: false, count: 0 };
 
@@ -1496,6 +1586,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     reason: string,
     resolveConflictingScheduleIds: string[] = []
   ) => {
+    if (currentUser?.role !== 'ADMIN') return;
+
     const selectedShift = shifts.find((sh) => sh.id === newShiftId);
     if (!selectedShift) return;
 
@@ -1574,6 +1666,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const changeStudentMentor = (regNumber: string, newMentorId: string, reason: string) => {
+    if (currentUser?.role !== 'ADMIN') return;
+
     const targetMentor = mentors.find((m) => m.id === newMentorId);
     if (!targetMentor) return;
 
@@ -1628,6 +1722,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const addStudent = (newStudent: Omit<Student, 'is_active_shift' | 'current_status'>, reason: string) => {
+    if (currentUser?.role !== 'ADMIN') return;
+
     const cleanReg = newStudent.register_number.trim().toUpperCase();
     const existing = students.find((s) => s.register_number.toUpperCase() === cleanReg);
     if (existing) {
@@ -1673,6 +1769,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const deleteStudent = (regNumber: string, reason: string) => {
+    if (currentUser?.role !== 'ADMIN') return;
+
     const student = students.find((s) => s.register_number === regNumber);
     if (!student) return;
 
@@ -1743,7 +1841,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         shifts,
         verifications,
         alerts,
-        activityLogs,
+        activityLogs: currentUser?.role === 'ADMIN' ? activityLogs : [],
         attendanceRecords,
         studentNotifications,
         mentorNotifications,
