@@ -1,0 +1,262 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>InternTrack - Admin Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-fixed": "#002109",
+                        "tertiary-container": "#006129",
+                        "on-primary-fixed-variant": "#004881",
+                        "tertiary-fixed": "#6bff8f",
+                        "error-container": "#ffdad6",
+                        "secondary": "#006a6a",
+                        "on-tertiary-fixed-variant": "#005321",
+                        "outline": "#727781",
+                        "on-surface": "#0b1c30",
+                        "surface-container-low": "#eff4ff",
+                        "on-error-container": "#93000a",
+                        "on-background": "#0b1c30",
+                        "surface-tint": "#1b60a2",
+                        "inverse-surface": "#213145",
+                        "on-secondary-fixed-variant": "#004f4f",
+                        "background": "#f8f9ff",
+                        "inverse-primary": "#a2c9ff",
+                        "surface-variant": "#d3e4fe",
+                        "on-secondary": "#ffffff",
+                        "on-primary-fixed": "#001c38",
+                        "inverse-on-surface": "#eaf1ff",
+                        "outline-variant": "#c1c7d2",
+                        "on-secondary-fixed": "#002020",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-high": "#dce9ff",
+                        "on-secondary-container": "#007070",
+                        "tertiary": "#00471c",
+                        "primary-fixed": "#d3e4ff",
+                        "error": "#ba1a1a",
+                        "on-primary-container": "#a4caff",
+                        "surface-bright": "#f8f9ff",
+                        "surface-container-highest": "#d3e4fe",
+                        "on-tertiary-container": "#4ce277",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-container": "#005596",
+                        "tertiary-fixed-dim": "#4ae176",
+                        "secondary-container": "#8cf3f3",
+                        "surface": "#f8f9ff",
+                        "secondary-fixed-dim": "#6fd7d6",
+                        "surface-dim": "#cbdbf5",
+                        "on-error": "#ffffff",
+                        "secondary-fixed": "#8cf3f3",
+                        "on-primary": "#ffffff",
+                        "primary": "#003e6f",
+                        "surface-container": "#e5eeff",
+                        "on-surface-variant": "#414750",
+                        "primary-fixed-dim": "#a2c9ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "card-padding": "16px",
+                        "inline-gap": "8px",
+                        "container-padding": "16px",
+                        "unit": "4px",
+                        "stack-gap": "12px"
+                    },
+                    "fontFamily": {
+                        "label-caps": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "display-id": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "status-badge": ["Inter"],
+                        "headline-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "display-id": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-lg": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "status-badge": ["12px", { "lineHeight": "12px", "fontWeight": "600" }],
+                        "headline-md": ["18px", { "lineHeight": "24px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Custom scrollbar for clean look */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background-color: #c1c7d2; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-background text-on-background h-screen flex overflow-hidden font-body-md">
+<!-- Navigation Drawer (Desktop Persistent, Mobile Hidden initially) -->
+<!-- Applying exact styles from JSON style_ keys -->
+<aside class="hidden md:flex flex-col bg-surface-container-low dark:bg-surface-dim h-full w-80 rounded-r-xl shadow-md dark:shadow-none fixed inset-y-0 left-0 z-50">
+<!-- Header -->
+<div class="p-container-padding border-b border-outline-variant/30 flex items-center gap-4">
+<img class="w-12 h-12 rounded-full object-cover border-2 border-primary-container" data-alt="A professional headshot portrait of a clinical supervisor in a modern hospital setting. The lighting is bright and clean, emphasizing a trustworthy and authoritative presence, suitable for a medical administration dashboard." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD8XlatqtTpzPjaGqpk07EO_4iKqZRfGUvMuv0STHar6aglwUDwIxWR7gBBXeclnMb0nRVcw_q-WajDpeh5CuFhZrub7CdD_NUaPKxqSl6tgJgasu5nE7jsjSjRs_uus4hIxeoEspbOhGBSg5UC6visVcO6n4E04bHO8I3H_KLmlVG_98oJ8moARfM9v6GzMkxZdBiyK49tQ7KT4iX3P-uiov618Pr_Sb0_i41IhgBMT8EzdkVNQpY">
+<div>
+<h2 class="font-headline-md text-headline-md text-primary dark:text-primary-fixed-dim">Dr. Sarah Mitchell</h2>
+<p class="font-body-md text-body-md text-on-surface-variant dark:text-outline-variant">Clinical Supervisor</p>
+<p class="font-label-caps text-label-caps text-secondary">Dept of Cardiology</p>
+</div>
+</div>
+<!-- Navigation Links -->
+<nav class="flex-1 py-4 space-y-2">
+<!-- Active Nav Item (Dashboard intent matches request) -->
+<a class="flex items-center gap-4 bg-primary-container dark:bg-primary text-on-primary-container dark:text-on-primary rounded-full px-4 py-3 mx-2 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-headline-md text-headline-md">Dashboard</span>
+</a>
+<!-- Inactive Nav Items -->
+<a class="flex items-center gap-4 text-on-surface-variant dark:text-outline-variant px-4 py-3 mx-2 hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="pending_actions">pending_actions</span>
+<span class="font-headline-md text-headline-md">Pending</span>
+</a>
+<a class="flex items-center gap-4 text-on-surface-variant dark:text-outline-variant px-4 py-3 mx-2 hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="font-headline-md text-headline-md">Students</span>
+</a>
+<a class="flex items-center gap-4 text-on-surface-variant dark:text-outline-variant px-4 py-3 mx-2 hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+<span class="font-headline-md text-headline-md">Profile</span>
+</a>
+</nav>
+</aside>
+<!-- Main Content Area -->
+<div class="flex-1 flex flex-col md:ml-80 h-full w-full bg-background transition-all duration-300">
+<!-- TopAppBar (Based on JSON instructions) -->
+<header class="bg-surface dark:bg-inverse-surface docked full-width top-0 flex justify-between items-center w-full px-container-padding h-12 z-50 border-b-0 shadow-sm relative">
+<div class="flex items-center gap-4">
+<button class="md:hidden text-primary p-2">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<h1 class="font-display-id text-display-id text-primary dark:text-primary-fixed-dim">InternTrack</h1>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-on-surface-variant hover:bg-surface-container-low p-2 rounded-full transition-colors duration-200">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<img class="w-8 h-8 rounded-full bg-surface-container-high border border-outline-variant hidden md:block" data-alt="A small circular avatar placeholder for the current user profile, showing a generic abstract professional icon suitable for a top navigation bar." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB2XXikObfAXyvu_ue510bhDH_aj9bB0FBUv_lRmFYoyUZwF4VhrtuRSP2YExFha6w8A4O2vdP6F4XqQzh3kxRAcj7CN7Nt7CNtwrx8mEunulcuj-rD4DK6HRqEOZH_QIQw7ETSKKsl7xnS2THFd0A6LwBZMFS7GW_HecQHAqoiHzPiwyK71hA9c6RIl_kIQPWdjO1tJlGA3lRznqd4x_OkkUlcvirZr4lOLwaoXRdKuH6HMoESIE8">
+</div>
+</header>
+<!-- Canvas -->
+<main class="flex-1 overflow-y-auto p-container-padding">
+<div class="max-w-6xl mx-auto space-y-stack-gap mb-12">
+<div class="flex justify-between items-end mb-6">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-on-background">System Overview</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Real-time status and quick actions</p>
+</div>
+<span class="font-status-badge text-status-badge bg-tertiary-container/10 text-tertiary-container px-3 py-1 rounded-full flex items-center gap-1 border border-tertiary-container/20">
+<span class="material-symbols-outlined text-[14px]">sync</span> Live
+                    </span>
+</div>
+<!-- Global Status Summary Grid -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-inline-gap mb-stack-gap">
+<!-- Stat Card 1 -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-card-padding flex flex-col justify-between h-[120px] transition-shadow hover:shadow-md hover:border-primary-fixed-dim group">
+<div class="flex justify-between items-start">
+<span class="font-headline-md text-headline-md text-on-surface-variant">Total Students</span>
+<span class="material-symbols-outlined text-primary group-hover:scale-110 transition-transform">school</span>
+</div>
+<div class="font-display-id text-[32px] font-bold text-on-background">150</div>
+</div>
+<!-- Stat Card 2 -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-card-padding flex flex-col justify-between h-[120px] transition-shadow hover:shadow-md hover:border-primary-fixed-dim group relative overflow-hidden"><div class="absolute inset-0 bg-secondary/5"></div><div class="flex justify-between items-start relative z-10"><span class="font-headline-md text-headline-md text-on-surface-variant">Total Mentors</span><span class="material-symbols-outlined text-secondary group-hover:scale-110 transition-transform">supervisor_account</span></div><div class="font-display-id text-[32px] font-bold text-secondary relative z-10">24</div></div>
+<!-- Stat Card 3 (Alert) -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-card-padding flex flex-col justify-between h-[120px] transition-shadow hover:shadow-md hover:border-primary-fixed-dim group"><div class="flex justify-between items-start"><span class="font-headline-md text-headline-md text-on-surface-variant">Active Shifts</span><span class="material-symbols-outlined text-tertiary-container group-hover:scale-110 transition-transform">clinical_notes</span></div><div class="font-display-id text-[32px] font-bold text-on-background">42</div></div>
+</section>
+<!-- Management Bento Grid -->
+<h3 class="font-headline-md text-headline-md text-on-background mt-8 mb-4">Management Modules</h3>
+<section class="grid grid-cols-1 md:grid-cols-2 gap-inline-gap mb-stack-gap">
+<a class="bg-surface-container-lowest border border-outline-variant rounded-xl p-card-padding flex items-center gap-4 hover:bg-surface-container-low transition-colors duration-200 min-h-[80px]" href="#">
+<div class="w-12 h-12 rounded-lg bg-primary-container/20 flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined">manage_accounts</span>
+</div>
+<div class="flex-1">
+<h4 class="font-headline-md text-headline-md text-on-surface">Student Management</h4>
+<p class="font-body-md text-body-md text-on-surface-variant text-sm">Onboard, edit, or deactivate intern profiles.</p>
+</div>
+<span class="material-symbols-outlined text-outline-variant">chevron_right</span>
+</a>
+<a class="bg-surface-container-lowest border border-outline-variant rounded-xl p-card-padding flex items-center gap-4 hover:bg-surface-container-low transition-colors duration-200 min-h-[80px]" href="#">
+<div class="w-12 h-12 rounded-lg bg-tertiary-container/20 flex items-center justify-center text-tertiary-container">
+<span class="material-symbols-outlined">supervisor_account</span>
+</div>
+<div class="flex-1">
+<h4 class="font-headline-md text-headline-md text-on-surface">Mentor Management</h4>
+<p class="font-body-md text-body-md text-on-surface-variant text-sm">Assign supervisors and clinical departments.</p>
+</div>
+<span class="material-symbols-outlined text-outline-variant">chevron_right</span>
+</a>
+<a class="bg-surface-container-lowest border border-outline-variant rounded-xl p-card-padding flex items-center gap-4 hover:bg-surface-container-low transition-colors duration-200 min-h-[80px]" href="#">
+<div class="w-12 h-12 rounded-lg bg-secondary-container/30 flex items-center justify-center text-on-secondary-container">
+<span class="material-symbols-outlined">event_note</span>
+</div>
+<div class="flex-1">
+<h4 class="font-headline-md text-headline-md text-on-surface">Shift Configuration</h4>
+<p class="font-body-md text-body-md text-on-surface-variant text-sm">Define shift templates, hours, and rules.</p>
+</div>
+<span class="material-symbols-outlined text-outline-variant">chevron_right</span>
+</a>
+<a class="bg-surface-container-lowest border border-outline-variant rounded-xl p-card-padding flex items-center gap-4 hover:bg-surface-container-low transition-colors duration-200 min-h-[80px]" href="#">
+<div class="w-12 h-12 rounded-lg bg-surface-variant flex items-center justify-center text-surface-tint">
+<span class="material-symbols-outlined">location_on</span>
+</div>
+<div class="flex-1">
+<h4 class="font-headline-md text-headline-md text-on-surface">Hospital GPS Settings</h4>
+<p class="font-body-md text-body-md text-on-surface-variant text-sm">Adjust verified campus boundaries for GPS check-ins.</p>
+</div>
+<span class="material-symbols-outlined text-outline-variant">chevron_right</span>
+</a>
+</section>
+<!-- Monitoring Links -->
+<h3 class="font-headline-md text-headline-md text-on-background mt-8 mb-4">Monitoring &amp; Logs</h3>
+<section class="grid grid-cols-1 md:grid-cols-3 gap-inline-gap">
+<a class="group relative overflow-hidden bg-surface-container-lowest border border-outline-variant rounded-xl p-card-padding flex flex-col gap-2 min-h-[100px] hover:border-primary-fixed-dim transition-colors" href="#">
+<div class="absolute right-0 bottom-0 opacity-5 group-hover:opacity-10 transition-opacity">
+<span class="material-symbols-outlined text-[80px]">fact_check</span>
+</div>
+<span class="material-symbols-outlined text-primary">fact_check</span>
+<span class="font-headline-md text-headline-md text-on-surface">Attendance Logs</span>
+</a>
+<a class="group relative overflow-hidden bg-surface-container-lowest border border-outline-variant rounded-xl p-card-padding flex flex-col gap-2 min-h-[100px] hover:border-primary-fixed-dim transition-colors" href="#">
+<div class="absolute right-0 bottom-0 opacity-5 group-hover:opacity-10 transition-opacity">
+<span class="material-symbols-outlined text-[80px]">explore</span>
+</div>
+<span class="material-symbols-outlined text-secondary">explore</span>
+<span class="font-headline-md text-headline-md text-on-surface">GPS Records</span>
+</a>
+<a class="group relative overflow-hidden bg-surface-container-lowest border border-outline-variant rounded-xl p-card-padding flex flex-col gap-2 min-h-[100px] hover:border-primary-fixed-dim transition-colors" href="#">
+<div class="absolute right-0 bottom-0 opacity-5 group-hover:opacity-10 transition-opacity">
+<span class="material-symbols-outlined text-[80px]">history</span>
+</div>
+<span class="material-symbols-outlined text-tertiary-container">history</span>
+<span class="font-headline-md text-headline-md text-on-surface">Activity Logs</span>
+</a>
+<a class="group relative overflow-hidden bg-primary-container/20 border border-primary-container rounded-xl p-card-padding flex flex-col gap-2 min-h-[100px] hover:shadow-md transition-all" href="#"><div class="absolute right-0 bottom-0 opacity-10 group-hover:opacity-20 transition-opacity"><span class="material-symbols-outlined text-[80px]">admin_panel_settings</span></div><span class="material-symbols-outlined text-primary">admin_panel_settings</span><span class="font-headline-md text-headline-md text-on-surface">Admin Activity Log</span><p class="text-xs text-on-surface-variant">View recent system-wide changes and reassignments.</p></a></section>
+<div class="h-12"></div> <!-- Bottom padding for scrolling -->
+</div>
+</main>
+</div>
+
+
+</body></html>

@@ -1,0 +1,223 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>InternTrack Splash Screen</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                            "on-tertiary-fixed": "#002109",
+                            "tertiary-container": "#006129",
+                            "on-primary-fixed-variant": "#004881",
+                            "tertiary-fixed": "#6bff8f",
+                            "error-container": "#ffdad6",
+                            "secondary": "#006a6a",
+                            "on-tertiary-fixed-variant": "#005321",
+                            "outline": "#727781",
+                            "on-surface": "#0b1c30",
+                            "surface-container-low": "#eff4ff",
+                            "on-error-container": "#93000a",
+                            "on-background": "#0b1c30",
+                            "surface-tint": "#1b60a2",
+                            "inverse-surface": "#213145",
+                            "on-secondary-fixed-variant": "#004f4f",
+                            "background": "#f8f9ff",
+                            "inverse-primary": "#a2c9ff",
+                            "surface-variant": "#d3e4fe",
+                            "on-secondary": "#ffffff",
+                            "on-primary-fixed": "#001c38",
+                            "inverse-on-surface": "#eaf1ff",
+                            "outline-variant": "#c1c7d2",
+                            "on-secondary-fixed": "#002020",
+                            "on-tertiary": "#ffffff",
+                            "surface-container-high": "#dce9ff",
+                            "on-secondary-container": "#007070",
+                            "tertiary": "#00471c",
+                            "primary-fixed": "#d3e4ff",
+                            "error": "#ba1a1a",
+                            "on-primary-container": "#a4caff",
+                            "surface-bright": "#f8f9ff",
+                            "surface-container-highest": "#d3e4fe",
+                            "on-tertiary-container": "#4ce277",
+                            "surface-container-lowest": "#ffffff",
+                            "primary-container": "#005596",
+                            "tertiary-fixed-dim": "#4ae176",
+                            "secondary-container": "#8cf3f3",
+                            "surface": "#f8f9ff",
+                            "secondary-fixed-dim": "#6fd7d6",
+                            "surface-dim": "#cbdbf5",
+                            "on-error": "#ffffff",
+                            "secondary-fixed": "#8cf3f3",
+                            "on-primary": "#ffffff",
+                            "primary": "#003e6f",
+                            "surface-container": "#e5eeff",
+                            "on-surface-variant": "#414750",
+                            "primary-fixed-dim": "#a2c9ff"
+                    },
+                    "borderRadius": {
+                            "DEFAULT": "0.125rem",
+                            "lg": "0.25rem",
+                            "xl": "0.5rem",
+                            "full": "0.75rem"
+                    },
+                    "spacing": {
+                            "card-padding": "16px",
+                            "inline-gap": "8px",
+                            "container-padding": "16px",
+                            "unit": "4px",
+                            "stack-gap": "12px"
+                    },
+                    "fontFamily": {
+                            "label-caps": [
+                                    "Inter"
+                            ],
+                            "body-lg": [
+                                    "Inter"
+                            ],
+                            "body-md": [
+                                    "Inter"
+                            ],
+                            "display-id": [
+                                    "Inter"
+                            ],
+                            "headline-lg": [
+                                    "Inter"
+                            ],
+                            "status-badge": [
+                                    "Inter"
+                            ],
+                            "headline-md": [
+                                    "Inter"
+                            ]
+                    },
+                    "fontSize": {
+                            "label-caps": [
+                                    "12px",
+                                    {
+                                            "lineHeight": "16px",
+                                            "letterSpacing": "0.05em",
+                                            "fontWeight": "700"
+                                    }
+                            ],
+                            "body-lg": [
+                                    "16px",
+                                    {
+                                            "lineHeight": "24px",
+                                            "fontWeight": "400"
+                                    }
+                            ],
+                            "body-md": [
+                                    "14px",
+                                    {
+                                            "lineHeight": "20px",
+                                            "fontWeight": "400"
+                                    }
+                            ],
+                            "display-id": [
+                                    "24px",
+                                    {
+                                            "lineHeight": "32px",
+                                            "letterSpacing": "-0.02em",
+                                            "fontWeight": "700"
+                                    }
+                            ],
+                            "headline-lg": [
+                                    "20px",
+                                    {
+                                            "lineHeight": "28px",
+                                            "fontWeight": "600"
+                                    }
+                            ],
+                            "status-badge": [
+                                    "12px",
+                                    {
+                                            "lineHeight": "12px",
+                                            "fontWeight": "600"
+                                    }
+                            ],
+                            "headline-md": [
+                                    "18px",
+                                    {
+                                            "lineHeight": "24px",
+                                            "fontWeight": "600"
+                                    }
+                            ]
+                    }
+            },
+                },
+        }
+    </script>
+<style>
+        /* Pulse Animation for Logo */
+        @keyframes subtle-pulse {
+            0% { transform: scale(1); opacity: 0.9; }
+            50% { transform: scale(1.02); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.9; }
+        }
+        .animate-subtle-pulse {
+            animation: subtle-pulse 3s infinite ease-in-out;
+        }
+
+        /* Loading Dots Animation */
+        .loading-dot {
+            animation: loading-bounce 1.4s infinite ease-in-out both;
+        }
+        .loading-dot:nth-child(1) { animation-delay: -0.32s; }
+        .loading-dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes loading-bounce {
+            0%, 80%, 100% { transform: scale(0); opacity: 0; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Fade In Animation */
+        .fade-in-up {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body class="bg-surface-container-lowest text-on-surface h-screen w-screen overflow-hidden flex flex-col items-center justify-center relative font-body-lg">
+<!-- Background Decor (Minimalist) -->
+<div class="absolute inset-0 pointer-events-none opacity-20">
+<div class="absolute top-0 left-0 w-64 h-64 bg-primary-container rounded-full blur-[100px] -translate-x-1/2 -translate-y-1/2"></div>
+<div class="absolute bottom-0 right-0 w-96 h-96 bg-secondary-container rounded-full blur-[120px] translate-x-1/3 translate-y-1/3"></div>
+</div>
+<!-- Main Content Container -->
+<main class="z-10 flex flex-col items-center justify-center space-y-stack-gap text-center px-container-padding max-w-md w-full">
+<!-- Logo Container -->
+<div class="w-32 h-32 md:w-40 md:h-40 mb-4 animate-subtle-pulse fade-in-up" style="animation-delay: 0.1s;">
+<!-- Using the requested image placeholder -->
+<img alt="InternTrack Logo" class="w-full h-full object-contain filter drop-shadow-sm" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCyO80O4qfSvHzx1XrkZuOxcbASW_FV1a71q34IveMK7VGkJTu_IkTLyp0x0jVBDw1G98ZYYq9R2S7GLJh3I9R9VSuWLMzdy_6nM2-sSc9-ONS8arfxVvUR-ZUx7-cBJaA6eOAy6DYxsgQdXb4NXEqqWAss6S_rXDBmfw9KGCNmLjU1J40d3p0KRtbKh6VMqmiI9PZ3qtjdxV1rAvwI-pEaGqY9DFAebFJHZc_B-IXLlpXMiBciZsE">
+</div>
+<!-- Brand Name -->
+<h1 class="font-display-id text-display-id text-primary fade-in-up" style="animation-delay: 0.3s;">
+            InternTrack
+        </h1>
+<!-- Subtext -->
+<p class="font-body-md text-body-md text-on-surface-variant max-w-xs mx-auto fade-in-up tracking-wide" style="animation-delay: 0.5s;">
+            Allied Health Science Internship Monitoring
+        </p>
+<!-- Loading Indicator (Bottom Fixed) -->
+<div class="absolute bottom-12 flex space-x-2 fade-in-up" style="animation-delay: 0.8s;">
+<div class="w-2 h-2 rounded-full bg-primary loading-dot"></div>
+<div class="w-2 h-2 rounded-full bg-primary loading-dot"></div>
+<div class="w-2 h-2 rounded-full bg-primary loading-dot"></div>
+</div>
+</main>
+<!-- Contextual Simulation Note (Hidden from actual UI, for developer awareness) -->
+<!-- Navigation shell is suppressed here as per the "Shell Visibility & Relevance - Automatic Suppression" rule for transactional/splash screens -->
+</body></html>

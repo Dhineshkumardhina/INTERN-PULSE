@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>InternTrack - Alert Filters</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-secondary-fixed-variant": "#004f4f",
+                      "error-container": "#ffdad6",
+                      "surface-container-highest": "#d3e4fe",
+                      "on-tertiary-container": "#4ce277",
+                      "on-secondary-fixed": "#002020",
+                      "inverse-primary": "#a2c9ff",
+                      "on-background": "#0b1c30",
+                      "on-error-container": "#93000a",
+                      "surface-container-lowest": "#ffffff",
+                      "on-primary-container": "#a4caff",
+                      "on-surface-variant": "#414750",
+                      "error": "#ba1a1a",
+                      "background": "#f8f9ff",
+                      "secondary": "#006a6a",
+                      "inverse-on-surface": "#eaf1ff",
+                      "surface-container-low": "#eff4ff",
+                      "on-error": "#ffffff",
+                      "tertiary-container": "#006129",
+                      "surface-dim": "#cbdbf5",
+                      "primary-fixed-dim": "#a2c9ff",
+                      "secondary-fixed": "#8cf3f3",
+                      "on-tertiary": "#ffffff",
+                      "outline": "#727781",
+                      "tertiary-fixed-dim": "#4ae176",
+                      "on-surface": "#0b1c30",
+                      "outline-variant": "#c1c7d2",
+                      "on-primary-fixed": "#001c38",
+                      "secondary-container": "#8cf3f3",
+                      "primary": "#003e6f",
+                      "surface-container-high": "#dce9ff",
+                      "surface-variant": "#d3e4fe",
+                      "tertiary": "#00471c",
+                      "on-primary": "#ffffff",
+                      "surface": "#f8f9ff",
+                      "on-primary-fixed-variant": "#004881",
+                      "surface-bright": "#f8f9ff",
+                      "primary-container": "#005596",
+                      "on-secondary": "#ffffff",
+                      "surface-container": "#e5eeff",
+                      "on-secondary-container": "#007070",
+                      "secondary-fixed-dim": "#6fd7d6",
+                      "on-tertiary-fixed": "#002109",
+                      "primary-fixed": "#d3e4ff",
+                      "surface-tint": "#1b60a2",
+                      "tertiary-fixed": "#6bff8f",
+                      "on-tertiary-fixed-variant": "#005321",
+                      "inverse-surface": "#213145"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "inline-gap": "8px",
+                      "stack-gap": "12px",
+                      "unit": "4px",
+                      "card-padding": "16px",
+                      "container-padding": "16px"
+              },
+              "fontFamily": {
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "headline-md": [
+                              "Inter"
+                      ],
+                      "status-badge": [
+                              "Inter"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "display-id": [
+                              "Inter"
+                      ],
+                      "headline-lg": [
+                              "Inter"
+                      ],
+                      "label-caps": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "body-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-md": [
+                              "18px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "status-badge": [
+                              "12px",
+                              {
+                                      "lineHeight": "12px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "display-id": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-lg": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "label-caps": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "700"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+</head>
+<body class="bg-surface text-on-surface min-h-screen pb-24 md:pb-0">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-surface dark:bg-surface border-b border-outline-variant dark:border-outline flat no shadows">
+<div class="flex items-center justify-between px-container-padding h-12 w-full">
+<button class="text-primary dark:text-primary-fixed hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors active:scale-95 duration-150 p-2 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+<h1 class="font-headline-lg text-headline-lg dark:text-on-surface">Filter Alerts</h1>
+<button class="text-primary dark:text-primary-fixed font-headline-md text-headline-md hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors active:scale-95 duration-150 px-2 py-1 rounded">
+                Reset
+            </button>
+</div>
+</header>
+<main class="pt-16 px-container-padding pb-stack-gap max-w-3xl mx-auto">
+<!-- Search Field -->
+<div class="mb-stack-gap">
+<div class="relative">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-outline">search</span>
+</div>
+<input class="w-full h-12 pl-10 pr-4 bg-surface-container-lowest border border-outline-variant rounded-lg focus:outline-none focus:border-primary focus:border-2 focus:ring-0 font-body-md text-body-md text-on-surface placeholder-on-surface-variant transition-all" placeholder="Search Student Name or ID..." type="text"/>
+</div>
+</div>
+<div class="space-y-stack-gap">
+<!-- Alert Status Section -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-card-padding">
+<h2 class="font-headline-md text-headline-md mb-inline-gap">Alert Status</h2>
+<div class="grid grid-cols-2 gap-inline-gap">
+<label class="flex items-center p-3 border border-outline-variant rounded-lg cursor-pointer hover:bg-surface-container-low transition-colors">
+<input class="form-checkbox h-5 w-5 text-primary border-outline-variant rounded focus:ring-primary" type="checkbox"/>
+<span class="ml-3 font-body-md text-body-md">Reviewed</span>
+</label>
+<label class="flex items-center p-3 border border-outline-variant rounded-lg cursor-pointer hover:bg-surface-container-low transition-colors">
+<input class="form-checkbox h-5 w-5 text-primary border-outline-variant rounded focus:ring-primary" type="checkbox"/>
+<span class="ml-3 font-body-md text-body-md">Needs Attention</span>
+</label>
+<label class="flex items-center p-3 border border-outline-variant rounded-lg cursor-pointer hover:bg-surface-container-low transition-colors">
+<input class="form-checkbox h-5 w-5 text-error border-outline-variant rounded focus:ring-error" type="checkbox"/>
+<span class="ml-3 font-body-md text-body-md text-error">Critical</span>
+</label>
+<label class="flex items-center p-3 border border-outline-variant rounded-lg cursor-pointer hover:bg-surface-container-low transition-colors">
+<input class="form-checkbox h-5 w-5 text-primary border-outline-variant rounded focus:ring-primary" type="checkbox"/>
+<span class="ml-3 font-body-md text-body-md">Resolved</span>
+</label>
+</div>
+</section>
+<!-- Alert Type Section -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-card-padding">
+<h2 class="font-headline-md text-headline-md mb-inline-gap">Alert Type</h2>
+<div class="flex flex-col gap-unit">
+<label class="flex items-center justify-between p-3 border-b border-outline-variant last:border-0 hover:bg-surface-container-low transition-colors cursor-pointer">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-error-container text-on-error-container flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">location_off</span>
+</div>
+<span class="font-body-md text-body-md">GPS Outside Geofence</span>
+</div>
+<input class="form-checkbox h-5 w-5 text-primary border-outline-variant rounded focus:ring-primary" type="checkbox"/>
+</label>
+<label class="flex items-center justify-between p-3 border-b border-outline-variant last:border-0 hover:bg-surface-container-low transition-colors cursor-pointer">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container-high text-on-surface-variant flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">signal_wifi_off</span>
+</div>
+<span class="font-body-md text-body-md">GPS Unavailable</span>
+</div>
+<input class="form-checkbox h-5 w-5 text-primary border-outline-variant rounded focus:ring-primary" type="checkbox"/>
+</label>
+<label class="flex items-center justify-between p-3 border-b border-outline-variant last:border-0 hover:bg-surface-container-low transition-colors cursor-pointer">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container-high text-on-surface-variant flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">schedule</span>
+</div>
+<span class="font-body-md text-body-md">Late Arrival</span>
+</div>
+<input class="form-checkbox h-5 w-5 text-primary border-outline-variant rounded focus:ring-primary" type="checkbox"/>
+</label>
+</div>
+</section>
+<!-- Shift Details Section -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-card-padding">
+<h2 class="font-headline-md text-headline-md mb-inline-gap">Shift Details</h2>
+<div class="space-y-4">
+<!-- Shift Type -->
+<div>
+<label class="block font-label-caps text-label-caps text-on-surface-variant mb-2">Shift Type</label>
+<div class="flex gap-2">
+<button class="flex-1 py-2 px-3 border border-primary bg-primary-container text-on-primary-container rounded-lg font-body-md text-body-md text-center transition-colors">Day</button>
+<button class="flex-1 py-2 px-3 border border-outline-variant bg-surface-container-lowest text-on-surface rounded-lg font-body-md text-body-md text-center hover:bg-surface-container-low transition-colors">Evening</button>
+<button class="flex-1 py-2 px-3 border border-outline-variant bg-surface-container-lowest text-on-surface rounded-lg font-body-md text-body-md text-center hover:bg-surface-container-low transition-colors">Night</button>
+</div>
+</div>
+<!-- Department -->
+<div>
+<label class="block font-label-caps text-label-caps text-on-surface-variant mb-2">Department</label>
+<select class="w-full h-12 px-4 bg-surface-container-lowest border border-outline-variant rounded-lg focus:outline-none focus:border-primary focus:border-2 focus:ring-0 font-body-md text-body-md text-on-surface appearance-none">
+<option value="">All Departments</option>
+<option value="cardiology">Cardiology</option>
+<option value="neurology">Neurology</option>
+<option value="emergency">Emergency</option>
+</select>
+<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-on-surface-variant">
+<span class="material-symbols-outlined">expand_more</span>
+</div>
+</div>
+<!-- Mentor -->
+<div class="relative">
+<label class="block font-label-caps text-label-caps text-on-surface-variant mb-2">Mentor</label>
+<select class="w-full h-12 px-4 bg-surface-container-lowest border border-outline-variant rounded-lg focus:outline-none focus:border-primary focus:border-2 focus:ring-0 font-body-md text-body-md text-on-surface appearance-none">
+<option value="">All Mentors</option>
+<option value="dr-smith">Dr. Smith</option>
+<option value="dr-jones">Dr. Jones</option>
+</select>
+<div class="pointer-events-none absolute inset-y-0 right-0 bottom-0 top-6 flex items-center px-4 text-on-surface-variant">
+<span class="material-symbols-outlined">expand_more</span>
+</div>
+</div>
+<!-- Date Picker (Simplified for design) -->
+<div>
+<label class="block font-label-caps text-label-caps text-on-surface-variant mb-2">Date Range</label>
+<div class="flex gap-2">
+<input class="flex-1 h-12 px-3 bg-surface-container-lowest border border-outline-variant rounded-lg focus:outline-none focus:border-primary focus:border-2 focus:ring-0 font-body-md text-body-md text-on-surface" type="date"/>
+<span class="flex items-center text-on-surface-variant">to</span>
+<input class="flex-1 h-12 px-3 bg-surface-container-lowest border border-outline-variant rounded-lg focus:outline-none focus:border-primary focus:border-2 focus:ring-0 font-body-md text-body-md text-on-surface" type="date"/>
+</div>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- Bottom Action Bar (Sticky) -->
+<div class="fixed bottom-0 w-full z-40 bg-surface border-t border-outline-variant p-4">
+<div class="max-w-3xl mx-auto">
+<button class="w-full h-12 bg-primary text-on-primary rounded-xl font-headline-md text-headline-md flex items-center justify-center gap-2 hover:bg-primary-fixed-dim transition-colors shadow-sm active:scale-95 duration-150">
+                Apply Filters
+                <span class="bg-primary-container text-on-primary-container px-2 py-0.5 rounded-full text-sm ml-2">3</span>
+</button>
+</div>
+</div>
+</body></html>

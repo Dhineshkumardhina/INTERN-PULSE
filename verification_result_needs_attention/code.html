@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>GPS Verification Failed</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts: Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        
+        @keyframes ripple {
+            0% {
+                transform: scale(0.8);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(2.5);
+                opacity: 0;
+            }
+        }
+        .animate-ripple {
+            animation: ripple 2s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+        }
+        .animation-delay-500 {
+            animation-delay: 500ms;
+        }
+        .animation-delay-1000 {
+            animation-delay: 1000ms;
+        }
+    </style>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-lowest": "#ffffff",
+                        "error": "#ba1a1a",
+                        "surface-tint": "#1b60a2",
+                        "outline": "#727781",
+                        "primary": "#003e6f",
+                        "surface-container-highest": "#d3e4fe",
+                        "surface": "#f8f9ff",
+                        "background": "#f8f9ff",
+                        "primary-fixed": "#d3e4ff",
+                        "secondary-fixed-dim": "#6fd7d6",
+                        "on-primary": "#ffffff",
+                        "inverse-surface": "#213145",
+                        "on-secondary-fixed-variant": "#004f4f",
+                        "surface-container-high": "#dce9ff",
+                        "on-error": "#ffffff",
+                        "on-surface-variant": "#414750",
+                        "surface-container-low": "#eff4ff",
+                        "on-background": "#0b1c30",
+                        "on-tertiary-fixed": "#002109",
+                        "on-secondary": "#ffffff",
+                        "secondary": "#006a6a",
+                        "secondary-container": "#8cf3f3",
+                        "tertiary": "#00471c",
+                        "primary-container": "#005596",
+                        "error-container": "#ffdad6",
+                        "on-secondary-container": "#007070",
+                        "outline-variant": "#c1c7d2",
+                        "on-primary-container": "#a4caff",
+                        "on-tertiary-container": "#4ce277",
+                        "inverse-primary": "#a2c9ff",
+                        "on-tertiary-fixed-variant": "#005321",
+                        "surface-variant": "#d3e4fe",
+                        "secondary-fixed": "#8cf3f3",
+                        "on-secondary-fixed": "#002020",
+                        "on-surface": "#0b1c30",
+                        "tertiary-fixed-dim": "#4ae176",
+                        "inverse-on-surface": "#eaf1ff",
+                        "tertiary-container": "#006129",
+                        "surface-container": "#e5eeff",
+                        "on-error-container": "#93000a",
+                        "surface-dim": "#cbdbf5",
+                        "primary-fixed-dim": "#a2c9ff",
+                        "on-primary-fixed-variant": "#004881",
+                        "tertiary-fixed": "#6bff8f",
+                        "surface-bright": "#f8f9ff",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-fixed": "#001c38"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "stack-gap": "12px",
+                        "inline-gap": "8px",
+                        "card-padding": "16px",
+                        "container-padding": "16px",
+                        "unit": "4px"
+                    },
+                    "fontFamily": {
+                        "display-id": ["Inter"],
+                        "body-md": ["Inter"],
+                        "status-badge": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "label-caps": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "display-id": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "status-badge": ["12px", { "lineHeight": "12px", "fontWeight": "600" }],
+                        "headline-md": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "headline-lg": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col relative overflow-hidden">
+<!-- Background Pattern for depth -->
+<div class="absolute inset-0 opacity-20 pointer-events-none" style="background-image: radial-gradient(circle at 2px 2px, #c1c7d2 1px, transparent 0); background-size: 24px 24px;"></div>
+<!-- Main Content Canvas -->
+<main class="flex-1 flex flex-col px-container-padding pt-12 pb-24 z-10 overflow-y-auto">
+<!-- Visual Verification Area -->
+<div class="flex flex-col items-center justify-center pt-8 pb-12">
+<div class="relative w-32 h-32 flex items-center justify-center mb-6">
+<!-- Concentric Pulsing Rings (Using Error tokens to signify failure in clinical system, per theme strictness) -->
+<div class="absolute inset-0 rounded-full border-2 border-error opacity-50 animate-ripple"></div>
+<div class="absolute inset-0 rounded-full border-2 border-error opacity-50 animate-ripple animation-delay-500"></div>
+<div class="absolute inset-0 rounded-full border-2 border-error opacity-50 animate-ripple animation-delay-1000"></div>
+<!-- Center Icon -->
+<div class="w-16 h-16 bg-error-container rounded-full flex items-center justify-center relative z-10 shadow-sm">
+<span class="material-symbols-outlined text-on-error-container" data-icon="location_disabled" style="font-size: 32px;">location_disabled</span>
+</div>
+</div>
+<!-- Status Header -->
+<div class="text-center px-4">
+<div class="inline-flex items-center gap-inline-gap bg-error-container text-on-error-container px-3 py-1.5 rounded-full mb-4">
+<span class="material-symbols-outlined" data-icon="warning" style="font-size: 16px; font-variation-settings: 'FILL' 1;">warning</span>
+<span class="font-status-badge text-status-badge tracking-wider uppercase">NEEDS ATTENTION</span>
+</div>
+<h1 class="font-display-id text-display-id text-on-background mb-2">Location Verification Failed</h1>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-sm mx-auto">
+                    Your current location could not be verified within the hospital area. Please check your GPS settings and try again.
+                </p>
+</div>
+</div>
+<!-- Information Cards -->
+<div class="flex flex-col gap-stack-gap w-full max-w-md mx-auto">
+<!-- Student Context Card -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-card-padding flex items-center gap-4">
+<div class="w-12 h-12 bg-surface-container-high rounded-full flex items-center justify-center text-primary font-headline-md text-headline-md">
+                    AK
+                </div>
+<div>
+<h2 class="font-headline-md text-headline-md text-on-background">Arun Kumar</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">ID: 23BHS001</p>
+</div>
+</div>
+<!-- Diagnostics Details Card -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden">
+<div class="px-card-padding py-3 bg-surface-container border-b border-outline-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="info" style="font-size: 18px;">info</span>
+<h3 class="font-label-caps text-label-caps text-primary uppercase">Verification Diagnostics</h3>
+</div>
+<div class="p-card-padding flex flex-col gap-4">
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="schedule" style="font-size: 18px;">schedule</span>
+<span class="font-body-md text-body-md">Time</span>
+</div>
+<span class="font-body-md text-body-md text-on-background font-semibold">03:42 AM</span>
+</div>
+<div class="h-px w-full bg-outline-variant/30"></div>
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="distance" style="font-size: 18px;">distance</span>
+<span class="font-body-md text-body-md">Distance from Hospital</span>
+</div>
+<span class="font-body-md text-body-md text-error font-semibold">1.2km</span>
+</div>
+<div class="h-px w-full bg-outline-variant/30"></div>
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="my_location" style="font-size: 18px;">my_location</span>
+<span class="font-body-md text-body-md">GPS Accuracy</span>
+</div>
+<span class="font-body-md text-body-md text-on-background">Medium</span>
+</div>
+<div class="h-px w-full bg-outline-variant/30"></div>
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="work" style="font-size: 18px;">work</span>
+<span class="font-body-md text-body-md">Current Shift</span>
+</div>
+<div class="text-right">
+<span class="font-body-md text-body-md text-on-background block">Night Shift</span>
+<span class="font-status-badge text-status-badge text-on-surface-variant block mt-0.5">10:00 PM – 06:00 AM</span>
+</div>
+</div>
+<div class="h-px w-full bg-outline-variant/30"></div>
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="local_hospital" style="font-size: 18px;">local_hospital</span>
+<span class="font-body-md text-body-md">Hospital</span>
+</div>
+<span class="font-body-md text-body-md text-on-background text-right max-w-[50%]">City General Hospital</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Fixed Bottom Action Area -->
+<div class="fixed bottom-0 left-0 w-full bg-surface/90 backdrop-blur-md border-t border-outline-variant/50 p-container-padding z-50">
+<div class="max-w-md mx-auto flex gap-4">
+<button class="flex-1 h-12 rounded-full border border-outline text-on-surface font-headline-md text-headline-md flex items-center justify-center hover:bg-surface-container-low transition-colors active:scale-[0.98]">
+                Retry
+            </button>
+<button class="flex-[2] h-12 rounded-full bg-primary text-on-primary font-headline-md text-headline-md flex items-center justify-center gap-2 hover:bg-primary-container hover:text-on-primary-container transition-colors active:scale-[0.98] shadow-sm">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+                Back to Shift
+            </button>
+</div>
+</div>
+</body></html>

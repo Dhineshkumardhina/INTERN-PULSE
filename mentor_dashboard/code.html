@@ -1,0 +1,312 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>InternTrack - Mentor Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-tertiary-fixed": "#002109",
+                      "tertiary-container": "#006129",
+                      "on-primary-fixed-variant": "#004881",
+                      "tertiary-fixed": "#6bff8f",
+                      "error-container": "#ffdad6",
+                      "secondary": "#006a6a",
+                      "on-tertiary-fixed-variant": "#005321",
+                      "outline": "#727781",
+                      "on-surface": "#0b1c30",
+                      "surface-container-low": "#eff4ff",
+                      "on-error-container": "#93000a",
+                      "on-background": "#0b1c30",
+                      "surface-tint": "#1b60a2",
+                      "inverse-surface": "#213145",
+                      "on-secondary-fixed-variant": "#004f4f",
+                      "background": "#f8f9ff",
+                      "inverse-primary": "#a2c9ff",
+                      "surface-variant": "#d3e4fe",
+                      "on-secondary": "#ffffff",
+                      "on-primary-fixed": "#001c38",
+                      "inverse-on-surface": "#eaf1ff",
+                      "outline-variant": "#c1c7d2",
+                      "on-secondary-fixed": "#002020",
+                      "on-tertiary": "#ffffff",
+                      "surface-container-high": "#dce9ff",
+                      "on-secondary-container": "#007070",
+                      "tertiary": "#00471c",
+                      "primary-fixed": "#d3e4ff",
+                      "error": "#ba1a1a",
+                      "on-primary-container": "#a4caff",
+                      "surface-bright": "#f8f9ff",
+                      "surface-container-highest": "#d3e4fe",
+                      "on-tertiary-container": "#4ce277",
+                      "surface-container-lowest": "#ffffff",
+                      "primary-container": "#005596",
+                      "tertiary-fixed-dim": "#4ae176",
+                      "secondary-container": "#8cf3f3",
+                      "surface": "#f8f9ff",
+                      "secondary-fixed-dim": "#6fd7d6",
+                      "surface-dim": "#cbdbf5",
+                      "on-error": "#ffffff",
+                      "secondary-fixed": "#8cf3f3",
+                      "on-primary": "#ffffff",
+                      "primary": "#003e6f",
+                      "surface-container": "#e5eeff",
+                      "on-surface-variant": "#414750",
+                      "primary-fixed-dim": "#a2c9ff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "card-padding": "16px",
+                      "inline-gap": "8px",
+                      "container-padding": "16px",
+                      "unit": "4px",
+                      "stack-gap": "12px"
+              },
+              "fontFamily": {
+                      "label-caps": [
+                              "Inter"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "display-id": [
+                              "Inter"
+                      ],
+                      "headline-lg": [
+                              "Inter"
+                      ],
+                      "status-badge": [
+                              "Inter"
+                      ],
+                      "headline-md": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "label-caps": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "display-id": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-lg": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "status-badge": [
+                              "12px",
+                              {
+                                      "lineHeight": "12px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-md": [
+                              "18px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "600"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+</head>
+<body class="bg-surface text-on-surface font-body-md min-h-screen pb-20">
+<!-- TopAppBar -->
+<header class="bg-surface text-primary font-headline-md docked full-width top-0 flat no shadows flex justify-between items-center w-full px-container-padding h-12 z-50 sticky">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[28px]" data-icon="account_circle">account_circle</span>
+</div>
+<div class="font-display-id text-display-id text-primary font-bold">InternTrack</div>
+<div>
+<span class="material-symbols-outlined text-primary hover:bg-surface-container-low transition-colors duration-200 p-2 rounded-full cursor-pointer" data-icon="notifications">notifications</span>
+</div>
+</header>
+<main class="px-container-padding py-6 max-w-4xl mx-auto">
+<!-- Greeting -->
+<div class="mb-8">
+<h1 class="font-headline-lg text-headline-lg text-on-surface mb-1">DR. SARAH MITCHELL</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Clinical Supervisor Dashboard</p>
+</div>
+<!-- Monitoring Stats (Bento Grid) -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"><!-- Verified -->
+<div class="bg-tertiary-container/10 border border-tertiary-container/20 rounded-xl p-4 flex flex-col justify-between min-h-[100px]">
+    <span class="font-label-caps text-label-caps text-tertiary mb-2">Verified</span>
+    <span class="font-display-id text-display-id text-tertiary">7</span>
+</div>
+<!-- Pending -->
+<div class="bg-surface-container-lowest border border-outline-variant/30 rounded-xl p-4 flex flex-col justify-between min-h-[100px]">
+    <span class="font-label-caps text-label-caps text-on-surface-variant mb-2">Pending</span>
+    <span class="font-display-id text-display-id text-primary">4</span>
+</div>
+<!-- Needs Attention -->
+<div class="bg-error-container/50 border border-error/20 rounded-xl p-4 flex flex-col justify-between min-h-[100px]">
+    <span class="font-label-caps text-label-caps text-error mb-2">Needs Attention</span>
+    <span class="font-display-id text-display-id text-error">1</span>
+</div>
+<!-- Failed GPS -->
+<div class="bg-error-container/10 border border-error/30 rounded-xl p-4 flex flex-col justify-between min-h-[100px]">
+    <span class="font-label-caps text-label-caps text-error mb-2">Failed GPS</span>
+    <span class="font-display-id text-display-id text-error">1</span>
+</div></div>
+<!-- Active Student List -->
+<h2 class="font-headline-md text-headline-md text-on-surface mb-4">Active Night Shift</h2>
+<div class="flex flex-col gap-stack-gap"><!-- Card 1: Verified -->
+<div class="bg-surface-container-lowest border border-outline-variant/50 rounded-xl p-card-padding flex flex-col gap-4">
+    <div class="flex justify-between items-start">
+        <div>
+            <h3 class="font-headline-md text-headline-md text-on-surface">Arun</h3>
+            <p class="font-body-md text-body-md text-on-surface-variant">Reg: 23BHS001 • Physiotherapy</p>
+        </div>
+        <div class="bg-tertiary-container/10 text-tertiary font-status-badge text-status-badge px-3 py-1.5 rounded-full flex items-center gap-1">
+            <span class="material-symbols-outlined text-[14px]" data-icon="check_circle">check_circle</span>
+            Verified
+        </div>
+    </div>
+    <div class="grid grid-cols-2 gap-2 mt-2">
+        <button class="flex items-center justify-center gap-2 py-2 border border-outline-variant/30 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors">
+            <span class="material-symbols-outlined text-[18px]">calendar_month</span>
+            Attendance
+        </button>
+        <button class="flex items-center justify-center gap-2 py-2 border border-outline-variant/30 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors">
+            <span class="material-symbols-outlined text-[18px]">location_on</span>
+            GPS History
+        </button>
+    </div>
+    <div class="flex justify-between items-center pt-4 border-t border-outline-variant/20">
+        <div class="flex items-center gap-2 text-on-surface-variant font-body-md text-body-md">
+            <span class="material-symbols-outlined text-[18px]" data-icon="schedule">schedule</span>
+            Last check: 11:42 PM
+        </div>
+        <div class="flex items-center gap-1 text-tertiary">
+            <span class="material-symbols-outlined animate-pulse text-[18px]" data-icon="my_location">my_location</span>
+        </div>
+    </div>
+</div>
+<!-- Card 2: Failed GPS -->
+<div class="bg-error-container/10 border border-error/30 rounded-xl p-card-padding flex flex-col gap-4">
+    <div class="flex justify-between items-start">
+        <div>
+            <h3 class="font-headline-md text-headline-md text-on-surface">Priya</h3>
+            <p class="font-body-md text-body-md text-on-surface-variant">Reg: 23BHS005 • Physiotherapy</p>
+        </div>
+        <div class="bg-error-container text-error font-status-badge text-status-badge px-3 py-1.5 rounded-full flex items-center gap-1">
+            <span class="material-symbols-outlined text-[14px]" data-icon="warning">warning</span>
+            Failed GPS
+        </div>
+    </div>
+    <div class="grid grid-cols-2 gap-2 mt-2">
+        <button class="flex items-center justify-center gap-2 py-2 border border-error/20 rounded-lg text-error hover:bg-error-container/20 transition-colors">
+            <span class="material-symbols-outlined text-[18px]">calendar_month</span>
+            Attendance
+        </button>
+        <button class="flex items-center justify-center gap-2 py-2 border border-error/20 rounded-lg text-error hover:bg-error-container/20 transition-colors">
+            <span class="material-symbols-outlined text-[18px]">location_on</span>
+            GPS History
+        </button>
+    </div>
+    <div class="flex justify-between items-center pt-4 border-t border-error/20">
+        <div class="flex items-center gap-2 text-error font-body-md text-body-md">
+            <span class="material-symbols-outlined text-[18px]" data-icon="schedule">schedule</span>
+            Last check: 03:42 AM (Failed)
+        </div>
+        <button class="bg-error text-on-error font-body-md text-body-md px-4 py-2 rounded-lg hover:bg-error/90 transition-colors">
+            Ping Intern
+        </button>
+    </div>
+</div></div>
+</main>
+<!-- BottomNavBar -->
+<nav class="bg-surface text-primary font-label-caps text-label-caps docked full-width bottom-0 flat no shadows fixed bottom-0 w-full z-50 flex justify-around items-center px-4 py-2 border-t border-outline-variant/30 md:hidden">
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container-high scale-95 transition-transform duration-150 rounded-lg" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="home">home</span>
+            Home
+        </a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container-high scale-95 transition-transform duration-150 rounded-lg" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="group">group</span>
+            Students
+        </a>
+<a class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-4 py-1 scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="dashboard" data-weight="fill">dashboard</span>
+            Dashboard
+        </a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container-high scale-95 transition-transform duration-150 rounded-lg" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="person">person</span>
+            Profile
+        </a>
+</nav>
+<!-- Desktop Navigation Drawer (Hidden on mobile) -->
+<aside class="hidden md:flex flex-col fixed inset-y-0 left-0 z-50 h-full w-80 rounded-r-xl bg-surface-container-low shadow-md pt-20">
+<div class="px-6 py-4 flex flex-col gap-2 border-b border-outline-variant/20 mb-4">
+<div class="w-16 h-16 rounded-full bg-surface-variant overflow-hidden mb-2">
+<img class="w-full h-full object-cover" data-alt="Professional clinical headshot of a female doctor in a modern hospital setting, wearing a white coat over scrubs. Clear bright lighting, clinical minimalist aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD4xeL8UxUjph7GXlukj4CAvqpGJkTnRufSgWFYa7wjD2awyOe7JpqDsQm8Qxp5qH47q1T3v9enJYoaKlkC-ZfdKCQiavm8cVd_4SgGJwEewp0Gkj0LTFbenEE_U_Ww23D0QVS26A31xUY8mr319L2x-HbPsacaGyqHoIeJP6JjWlpqM8pyxrgl-o2rGkIIhZ1LadacC8Ak--9PsVnNMuQ6lucwEtRZAPNwZZ2S2AZvFliCb-154v8">
+</div>
+<h2 class="font-headline-lg text-headline-lg text-primary">Dr. Sarah Mitchell</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Clinical Supervisor</p>
+<p class="font-label-caps text-label-caps text-secondary">Dept of Cardiology</p>
+</div>
+<nav class="flex-1 overflow-y-auto font-body-md text-body-md">
+<a class="flex items-center gap-4 bg-primary-container text-on-primary-container rounded-full px-4 py-3 mx-2 mb-2 active:opacity-80 transition-opacity font-bold" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard" data-weight="fill">dashboard</span>
+                Dashboard
+            </a>
+<a class="flex items-center gap-4 text-on-surface-variant px-4 py-3 mx-2 mb-2 hover:bg-surface-container-high rounded-full active:opacity-80 transition-opacity" href="#">
+<span class="material-symbols-outlined" data-icon="pending_actions">pending_actions</span>
+                Pending
+            </a>
+<a class="flex items-center gap-4 text-on-surface-variant px-4 py-3 mx-2 mb-2 hover:bg-surface-container-high rounded-full active:opacity-80 transition-opacity" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+                Students
+            </a>
+<a class="flex items-center gap-4 text-on-surface-variant px-4 py-3 mx-2 mb-2 hover:bg-surface-container-high rounded-full active:opacity-80 transition-opacity" href="#">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+                Profile
+            </a>
+</nav>
+</aside>
+
+
+</body></html>

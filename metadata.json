@@ -1,0 +1,10 @@
+{
+  "name": "InternTrack - Allied Health Science Internship Monitoring System",
+  "description": "Clinical internship tracking with simulated GPS geofencing, continuous night-shift monitoring, supervisor alert reviews, and departmental analytics.",
+  "requestFramePermissions": [
+    "geolocation"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

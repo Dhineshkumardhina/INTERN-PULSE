@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Departmental Alerts for HOD</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-fixed": "#001c38",
+                        "outline-variant": "#c1c7d2",
+                        "tertiary-fixed": "#6bff8f",
+                        "tertiary": "#00471c",
+                        "tertiary-container": "#006129",
+                        "secondary-fixed-dim": "#6fd7d6",
+                        "surface": "#f8f9ff",
+                        "surface-container-lowest": "#ffffff",
+                        "on-surface-variant": "#414750",
+                        "on-error-container": "#93000a",
+                        "on-primary-fixed-variant": "#004881",
+                        "on-primary": "#ffffff",
+                        "surface-variant": "#d3e4fe",
+                        "on-tertiary-container": "#4ce277",
+                        "background": "#f8f9ff",
+                        "inverse-surface": "#213145",
+                        "on-surface": "#0b1c30",
+                        "secondary-fixed": "#8cf3f3",
+                        "primary-container": "#005596",
+                        "on-primary-container": "#a4caff",
+                        "surface-container-highest": "#d3e4fe",
+                        "error": "#ba1a1a",
+                        "on-secondary-fixed-variant": "#004f4f",
+                        "tertiary-fixed-dim": "#4ae176",
+                        "secondary-container": "#8cf3f3",
+                        "primary-fixed": "#d3e4ff",
+                        "surface-dim": "#cbdbf5",
+                        "error-container": "#ffdad6",
+                        "outline": "#727781",
+                        "on-secondary": "#ffffff",
+                        "primary": "#003e6f",
+                        "surface-container": "#e5eeff",
+                        "surface-tint": "#1b60a2",
+                        "primary-fixed-dim": "#a2c9ff",
+                        "inverse-primary": "#a2c9ff",
+                        "on-secondary-fixed": "#002020",
+                        "surface-container-low": "#eff4ff",
+                        "on-error": "#ffffff",
+                        "surface-bright": "#f8f9ff",
+                        "surface-container-high": "#dce9ff",
+                        "on-secondary-container": "#007070",
+                        "on-background": "#0b1c30",
+                        "on-tertiary": "#ffffff",
+                        "inverse-on-surface": "#eaf1ff",
+                        "secondary": "#006a6a",
+                        "on-tertiary-fixed": "#002109",
+                        "on-tertiary-fixed-variant": "#005321"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "unit": "4px",
+                        "container-padding": "16px",
+                        "card-padding": "16px",
+                        "inline-gap": "8px",
+                        "stack-gap": "12px"
+                    },
+                    "fontFamily": {
+                        "status-badge": ["Inter"],
+                        "label-caps": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "display-id": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "headline-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "status-badge": ["12px", { "lineHeight": "12px", "fontWeight": "600" }],
+                        "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "display-id": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-lg": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "headline-md": ["18px", { "lineHeight": "24px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+</head>
+<body class="bg-background text-on-background font-body-md antialiased pb-20 md:pb-0">
+<!-- TopAppBar -->
+<header class="w-full top-0 sticky bg-surface border-b border-outline-variant flex justify-between items-center px-container-padding h-12 w-full z-40 transition-colors duration-200 ease-in-out">
+<div class="flex items-center gap-inline-gap">
+<span class="material-symbols-outlined text-primary" data-icon="clinical_notes">clinical_notes</span>
+<h1 class="font-headline-md text-headline-md text-primary font-bold">Clinical Oversight</h1>
+</div>
+<!-- Hidden desktop nav, handled in BottomNavBar for mobile context primarily, but included for structural completeness if md:flex -->
+<nav class="hidden md:flex gap-inline-gap h-full items-center">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high px-4 py-1 rounded-full transition-colors duration-200 ease-in-out" href="#">
+<span class="font-label-caps text-label-caps">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high px-4 py-1 rounded-full transition-colors duration-200 ease-in-out" href="#">
+<span class="font-label-caps text-label-caps">Students</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high px-4 py-1 rounded-full transition-colors duration-200 ease-in-out" href="#">
+<span class="font-label-caps text-label-caps">Mentors</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container px-4 py-1 rounded-full transition-colors duration-200 ease-in-out" href="#">
+<span class="font-label-caps text-label-caps">Alerts</span>
+</a>
+</nav>
+</header>
+<main class="p-container-padding max-w-7xl mx-auto space-y-stack-gap">
+<div class="flex justify-between items-end mb-6">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-on-background">Departmental Alerts</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Review active and resolved alerts requiring HOD oversight.</p>
+</div>
+<div class="flex gap-2">
+<button class="flex items-center gap-1 bg-surface-container px-3 py-2 rounded-lg border border-outline-variant text-primary hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-[18px]">filter_list</span>
+<span class="font-label-caps text-label-caps">Filter</span>
+</button>
+</div>
+</div>
+<!-- Alert Cards List -->
+<div class="flex flex-col gap-stack-gap">
+<!-- Alert Card 1: Needs Attention -->
+<article class="bg-surface-container-lowest border border-outline-variant rounded-xl p-card-padding flex flex-col gap-3 min-h-[48px] hover:shadow-[0_4px_4px_rgba(0,0,0,0.05)] transition-shadow cursor-pointer">
+<!-- Header: Student Info -->
+<div class="flex justify-between items-start">
+<div>
+<h3 class="font-headline-md text-headline-md text-on-background">Sarah Jenkins</h3>
+<p class="font-display-id text-display-id text-primary text-[16px] leading-[20px]">23BHS042</p>
+</div>
+<!-- Status Badge -->
+<div class="bg-[#FFF4E5] text-[#935200] px-2 py-1 rounded-full flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">warning</span>
+<span class="font-status-badge text-status-badge uppercase">Needs Attention</span>
+</div>
+</div>
+<!-- Middle: Details -->
+<div class="grid grid-cols-2 gap-x-4 gap-y-2 mt-2 border-t border-surface-container-highest pt-3">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-on-surface-variant">Mentor</span>
+<span class="font-body-md text-body-md text-on-background">Dr. Emily Chen</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-on-surface-variant">Shift / Time</span>
+<span class="font-body-md text-body-md text-on-background">Night / 03:42 AM</span>
+</div>
+</div>
+<!-- Footer: Alert Type -->
+<div class="bg-error-container text-on-error-container p-3 rounded-lg flex items-center gap-3 mt-2">
+<span class="material-symbols-outlined">location_off</span>
+<div>
+<p class="font-body-md text-body-md font-semibold">GPS Needs Attention</p>
+<p class="font-body-md text-body-md text-[12px] opacity-80">Device disconnected for &gt; 15 mins</p>
+</div>
+</div>
+</article>
+<!-- Alert Card 2: Reviewed -->
+<article class="bg-surface-container-lowest border border-outline-variant rounded-xl p-card-padding flex flex-col gap-3 min-h-[48px] hover:shadow-[0_4px_4px_rgba(0,0,0,0.05)] transition-shadow cursor-pointer">
+<div class="flex justify-between items-start">
+<div>
+<h3 class="font-headline-md text-headline-md text-on-background">Marcus Thorne</h3>
+<p class="font-display-id text-display-id text-primary text-[16px] leading-[20px]">23BHS105</p>
+</div>
+<div class="bg-[#E6F4EA] text-[#0D652D] px-2 py-1 rounded-full flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+<span class="font-status-badge text-status-badge uppercase">Reviewed</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-x-4 gap-y-2 mt-2 border-t border-surface-container-highest pt-3">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-on-surface-variant">Mentor</span>
+<span class="font-body-md text-body-md text-on-background">Dr. Robert Vance</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-on-surface-variant">Shift / Time</span>
+<span class="font-body-md text-body-md text-on-background">Day / 11:15 AM</span>
+</div>
+</div>
+<div class="bg-surface-container-high text-on-surface p-3 rounded-lg flex items-center gap-3 mt-2">
+<span class="material-symbols-outlined">schedule</span>
+<div>
+<p class="font-body-md text-body-md font-semibold">Late Check-in</p>
+<p class="font-body-md text-body-md text-[12px] opacity-80">Acknowledged by mentor</p>
+</div>
+</div>
+</article>
+<!-- Alert Card 3: Needs Attention -->
+<article class="bg-surface-container-lowest border border-outline-variant rounded-xl p-card-padding flex flex-col gap-3 min-h-[48px] hover:shadow-[0_4px_4px_rgba(0,0,0,0.05)] transition-shadow cursor-pointer">
+<div class="flex justify-between items-start">
+<div>
+<h3 class="font-headline-md text-headline-md text-on-background">Elena Rodriguez</h3>
+<p class="font-display-id text-display-id text-primary text-[16px] leading-[20px]">23BHS088</p>
+</div>
+<div class="bg-[#FFF4E5] text-[#935200] px-2 py-1 rounded-full flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">warning</span>
+<span class="font-status-badge text-status-badge uppercase">Needs Attention</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-x-4 gap-y-2 mt-2 border-t border-surface-container-highest pt-3">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-on-surface-variant">Mentor</span>
+<span class="font-body-md text-body-md text-on-background">Dr. Sarah Jenkins</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-on-surface-variant">Shift / Time</span>
+<span class="font-body-md text-body-md text-on-background">Swing / 08:30 PM</span>
+</div>
+</div>
+<div class="bg-error-container text-on-error-container p-3 rounded-lg flex items-center gap-3 mt-2">
+<span class="material-symbols-outlined">report_problem</span>
+<div>
+<p class="font-body-md text-body-md font-semibold">Zone Violation</p>
+<p class="font-body-md text-body-md text-[12px] opacity-80">Entered restricted ward B2</p>
+</div>
+</div>
+</article>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-container-padding py-2 h-16 bg-surface border-t border-outline-variant z-50 md:hidden">
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:text-primary scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-label-caps text-label-caps mt-1">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:text-primary scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="font-label-caps text-label-caps mt-1">Students</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:text-primary scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="supervisor_account">supervisor_account</span>
+<span class="font-label-caps text-label-caps mt-1">Mentors</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-4 py-1 scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="notification_important">notification_important</span>
+<span class="font-label-caps text-label-caps mt-1">Alerts</span>
+</a>
+</nav>
+</body></html>

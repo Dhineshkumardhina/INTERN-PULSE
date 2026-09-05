@@ -1,0 +1,282 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>InternTrack - Student Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-tertiary-fixed": "#002109",
+                      "tertiary-container": "#006129",
+                      "on-primary-fixed-variant": "#004881",
+                      "tertiary-fixed": "#6bff8f",
+                      "error-container": "#ffdad6",
+                      "secondary": "#006a6a",
+                      "on-tertiary-fixed-variant": "#005321",
+                      "outline": "#727781",
+                      "on-surface": "#0b1c30",
+                      "surface-container-low": "#eff4ff",
+                      "on-error-container": "#93000a",
+                      "on-background": "#0b1c30",
+                      "surface-tint": "#1b60a2",
+                      "inverse-surface": "#213145",
+                      "on-secondary-fixed-variant": "#004f4f",
+                      "background": "#f8f9ff",
+                      "inverse-primary": "#a2c9ff",
+                      "surface-variant": "#d3e4fe",
+                      "on-secondary": "#ffffff",
+                      "on-primary-fixed": "#001c38",
+                      "inverse-on-surface": "#eaf1ff",
+                      "outline-variant": "#c1c7d2",
+                      "on-secondary-fixed": "#002020",
+                      "on-tertiary": "#ffffff",
+                      "surface-container-high": "#dce9ff",
+                      "on-secondary-container": "#007070",
+                      "tertiary": "#00471c",
+                      "primary-fixed": "#d3e4ff",
+                      "error": "#ba1a1a",
+                      "on-primary-container": "#a4caff",
+                      "surface-bright": "#f8f9ff",
+                      "surface-container-highest": "#d3e4fe",
+                      "on-tertiary-container": "#4ce277",
+                      "surface-container-lowest": "#ffffff",
+                      "primary-container": "#005596",
+                      "tertiary-fixed-dim": "#4ae176",
+                      "secondary-container": "#8cf3f3",
+                      "surface": "#f8f9ff",
+                      "secondary-fixed-dim": "#6fd7d6",
+                      "surface-dim": "#cbdbf5",
+                      "on-error": "#ffffff",
+                      "secondary-fixed": "#8cf3f3",
+                      "on-primary": "#ffffff",
+                      "primary": "#003e6f",
+                      "surface-container": "#e5eeff",
+                      "on-surface-variant": "#414750",
+                      "primary-fixed-dim": "#a2c9ff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "card-padding": "16px",
+                      "inline-gap": "8px",
+                      "container-padding": "16px",
+                      "unit": "4px",
+                      "stack-gap": "12px"
+              },
+              "fontFamily": {
+                      "label-caps": [
+                              "Inter"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "display-id": [
+                              "Inter"
+                      ],
+                      "headline-lg": [
+                              "Inter"
+                      ],
+                      "status-badge": [
+                              "Inter"
+                      ],
+                      "headline-md": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "label-caps": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "display-id": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-lg": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "status-badge": [
+                              "12px",
+                              {
+                                      "lineHeight": "12px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-md": [
+                              "18px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "600"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+    </script>
+<style>
+        .pulse-ring {
+            animation: pulsate 2s infinite ease-out;
+        }
+        @keyframes pulsate {
+            0% {
+                transform: scale(0.8);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(1.5);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col pb-20">
+<!-- TopAppBar -->
+<header class="docked full-width top-0 bg-surface dark:bg-inverse-surface flex justify-between items-center w-full px-container-padding h-12 z-50">
+<div class="flex items-center gap-inline-gap">
+<div class="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="A close-up portrait of a young male intern with dark hair, wearing scrubs, set against a dark hospital corridor with subtle blue and green lighting in the background, conveying a high-stakes, modern clinical environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAQRjYJ9Ag7bGNLZknNDWbn1gD11BtyRf6x2lsr_aY_isqS-UmS0zTZixd3UjJ-PoPq44EVYm-Lg3nzwF84QFqU1mLl46d5TiwxSFQt4SB3CmjcWKB1jmsP9-zQ8_AChzP5m_egsLg_SmqW9HPBsHQNtsUuDDyHXNTb478IBPUQyAACYqeQk5lmU6RH6Bt18KfrbbcyBmfAJ6P6eW2-OAmLLTGER_r_N78LTMUI2236KmekLhYSmhA">
+</div>
+<span class="font-display-id text-display-id text-primary dark:text-primary-fixed-dim">InternTrack</span>
+</div>
+<button class="hover:bg-surface-container-low dark:hover:bg-surface-container-highest transition-colors duration-200 p-2 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim" data-icon="notifications">notifications</span>
+</button>
+</header>
+<!-- Main Canvas -->
+<main class="flex-grow p-container-padding flex flex-col gap-stack-gap">
+<!-- Greeting -->
+<section class="mt-4 mb-2">
+<h1 class="font-headline-lg text-headline-lg">GOOD EVENING, ARUN</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">ID: 23BHS001</p>
+</section>
+<!-- Current Status BENTO -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-card-padding flex flex-col items-center justify-center relative overflow-hidden h-48">
+<div class="absolute inset-0 flex items-center justify-center">
+<div class="w-24 h-24 rounded-full border-2 border-tertiary-fixed pulse-ring absolute"></div>
+<div class="w-16 h-16 rounded-full border-2 border-tertiary-fixed pulse-ring absolute" style="animation-delay: 0.5s;"></div>
+<div class="w-32 h-32 rounded-full border-2 border-tertiary-fixed pulse-ring absolute" style="animation-delay: 1s;"></div>
+</div>
+<div class="z-10 flex flex-col items-center">
+<span class="material-symbols-outlined text-4xl text-tertiary-container mb-2" data-icon="location_on" data-weight="fill" style="font-variation-settings: 'FILL' 1;">location_on</span>
+<div class="bg-tertiary-container/10 px-3 py-1 rounded-full mb-1">
+<span class="font-status-badge text-status-badge text-tertiary-container">Current Status: ● Verified</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">Last verification: 11:42 PM</p>
+</div>
+</section>
+<!-- Today's Internship Card -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-card-padding">
+<h2 class="font-headline-md text-headline-md mb-4 border-b border-outline-variant pb-2">Today's Internship</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-inline-gap mb-4">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-outline mt-0.5" data-icon="local_hospital">local_hospital</span>
+<div>
+<p class="font-label-caps text-label-caps text-outline">HOSPITAL</p>
+<p class="font-body-md text-body-md font-medium">City General Hospital</p>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-outline mt-0.5" data-icon="medical_services">medical_services</span>
+<div>
+<p class="font-label-caps text-label-caps text-outline">DEPARTMENT</p>
+<p class="font-body-md text-body-md font-medium">Physiotherapy</p>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-outline mt-0.5" data-icon="person_outline">person_outline</span>
+<div>
+<p class="font-label-caps text-label-caps text-outline">MENTOR</p>
+<p class="font-body-md text-body-md font-medium">Dr. Sarah Mitchell</p>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-outline mt-0.5" data-icon="schedule">schedule</span>
+<div>
+<p class="font-label-caps text-label-caps text-outline">SHIFT</p>
+<p class="font-body-md text-body-md font-medium">Night Shift (10:00 PM – 06:00 AM)</p>
+</div>
+</div>
+</div>
+<button class="w-full bg-primary text-on-primary py-3 rounded-xl font-headline-md text-headline-md h-12 flex items-center justify-center gap-2 shadow-sm">
+                View Current Shift
+                <span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</section>
+<!-- Attendance Summary -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-card-padding">
+<h2 class="font-headline-md text-headline-md mb-3">Attendance Status</h2>
+<div class="flex justify-between items-center">
+<div>
+<p class="font-body-lg text-body-lg font-medium">Present</p>
+<p class="font-body-md text-body-md text-on-surface-variant">On track for requirement</p>
+</div>
+<div class="w-12 h-12 rounded-full border-4 border-primary-container border-t-tertiary-container flex items-center justify-center">
+<span class="font-label-caps text-label-caps">92%</span>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full z-50 flex justify-around items-center px-4 py-2 border-t border-outline-variant dark:border-outline bg-surface dark:bg-inverse-surface">
+<!-- Home (Active) -->
+<button class="flex flex-col items-center justify-center bg-secondary-container dark:bg-on-secondary-fixed-variant text-on-secondary-container dark:text-secondary-fixed rounded-full px-4 py-1 hover:bg-surface-container-high dark:hover:bg-surface-container-highest scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined mb-1" data-icon="home" data-weight="fill" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="font-label-caps text-label-caps">Home</span>
+</button>
+<!-- Shifts (Inactive) -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-4 py-1 hover:bg-surface-container-high dark:hover:bg-surface-container-highest scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined mb-1" data-icon="schedule">schedule</span>
+<span class="font-label-caps text-label-caps">Shifts</span>
+</button>
+<!-- Logs (Inactive) -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-4 py-1 hover:bg-surface-container-high dark:hover:bg-surface-container-highest scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined mb-1" data-icon="assignment">assignment</span>
+<span class="font-label-caps text-label-caps">Logs</span>
+</button>
+<!-- Profile (Inactive) -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-4 py-1 hover:bg-surface-container-high dark:hover:bg-surface-container-highest scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined mb-1" data-icon="person">person</span>
+<span class="font-label-caps text-label-caps">Profile</span>
+</button>
+</nav>
+</body></html>

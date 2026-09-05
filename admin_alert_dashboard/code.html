@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>InternTrack - Admin Alert Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-fixed-variant": "#004f4f",
+                        "error-container": "#ffdad6",
+                        "surface-container-highest": "#d3e4fe",
+                        "on-tertiary-container": "#4ce277",
+                        "on-secondary-fixed": "#002020",
+                        "inverse-primary": "#a2c9ff",
+                        "on-background": "#0b1c30",
+                        "on-error-container": "#93000a",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-container": "#a4caff",
+                        "on-surface-variant": "#414750",
+                        "error": "#ba1a1a",
+                        "background": "#f8f9ff",
+                        "secondary": "#006a6a",
+                        "inverse-on-surface": "#eaf1ff",
+                        "surface-container-low": "#eff4ff",
+                        "on-error": "#ffffff",
+                        "tertiary-container": "#006129",
+                        "surface-dim": "#cbdbf5",
+                        "primary-fixed-dim": "#a2c9ff",
+                        "secondary-fixed": "#8cf3f3",
+                        "on-tertiary": "#ffffff",
+                        "outline": "#727781",
+                        "tertiary-fixed-dim": "#4ae176",
+                        "on-surface": "#0b1c30",
+                        "outline-variant": "#c1c7d2",
+                        "on-primary-fixed": "#001c38",
+                        "secondary-container": "#8cf3f3",
+                        "primary": "#003e6f",
+                        "surface-container-high": "#dce9ff",
+                        "surface-variant": "#d3e4fe",
+                        "tertiary": "#00471c",
+                        "on-primary": "#ffffff",
+                        "surface": "#f8f9ff",
+                        "on-primary-fixed-variant": "#004881",
+                        "surface-bright": "#f8f9ff",
+                        "primary-container": "#005596",
+                        "on-secondary": "#ffffff",
+                        "surface-container": "#e5eeff",
+                        "on-secondary-container": "#007070",
+                        "secondary-fixed-dim": "#6fd7d6",
+                        "on-tertiary-fixed": "#002109",
+                        "primary-fixed": "#d3e4ff",
+                        "surface-tint": "#1b60a2",
+                        "tertiary-fixed": "#6bff8f",
+                        "on-tertiary-fixed-variant": "#005321",
+                        "inverse-surface": "#213145"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "inline-gap": "8px",
+                        "stack-gap": "12px",
+                        "unit": "4px",
+                        "card-padding": "16px",
+                        "container-padding": "16px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "status-badge": ["Inter"],
+                        "body-md": ["Inter"],
+                        "display-id": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "label-caps": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-md": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "status-badge": ["12px", { "lineHeight": "12px", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "display-id": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-lg": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.filled {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        
+        /* Level 1 Card Elevation */
+        .card-level-1 {
+            background-color: #FFFFFF;
+            border: 1px solid #E2E8F0;
+        }
+        
+        /* Interactive Element Touch Target */
+        .touch-target {
+            min-height: 48px;
+        }
+
+        /* Tonal Badge - Amber/Needs Attention */
+        .badge-amber {
+            background-color: rgba(186, 26, 26, 0.1); /* Using error color for high severity alert conceptually */
+            color: #ba1a1a;
+        }
+        
+        /* Tonal Badge - Normal */
+        .badge-normal {
+            background-color: rgba(0, 62, 111, 0.1); /* Primary color */
+            color: #003e6f;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body-md min-h-screen pb-24 md:pb-0 pt-16">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-surface border-b border-outline-variant flex items-center justify-between px-container-padding h-12">
+<button class="text-primary hover:bg-surface-container-high transition-colors active:scale-95 duration-150 rounded-full p-1 -ml-1">
+<span class="material-symbols-outlined" data-icon="clinical_notes">clinical_notes</span>
+</button>
+<h1 class="font-display-id text-display-id text-primary">InternTrack</h1>
+<button class="text-primary hover:bg-surface-container-high transition-colors active:scale-95 duration-150 rounded-full p-1 -mr-1">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+</header>
+<main class="max-w-7xl mx-auto px-container-padding py-stack-gap md:py-6 lg:py-8">
+<!-- Dashboard Header & Search -->
+<div class="mb-6 space-y-4">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">Admin Alert Dashboard</h2>
+<p class="font-body-md text-on-surface-variant mt-1">Real-time monitoring and alert management.</p>
+</div>
+<div class="flex gap-inline-gap">
+<div class="relative flex-1">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full pl-10 pr-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg focus:border-primary focus:border-2 focus:ring-0 transition-all font-body-md text-on-surface placeholder:text-on-surface-variant touch-target" placeholder="Search Name or Register No" type="text"/>
+</div>
+<button class="flex items-center justify-center bg-surface-container-low border border-outline-variant rounded-lg px-4 hover:bg-surface-container-high transition-colors touch-target text-primary">
+<span class="material-symbols-outlined mr-2">filter_list</span>
+<span class="font-label-caps text-label-caps hidden sm:inline">Filter</span>
+</button>
+</div>
+</div>
+<!-- Summary Grid (Bento Style) -->
+<div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-stack-gap mb-8">
+<!-- Active Interns -->
+<div class="card-level-1 rounded-xl p-card-padding flex flex-col justify-between">
+<div class="flex items-center gap-2 mb-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-sm">groups</span>
+<span class="font-label-caps text-label-caps">Active Interns</span>
+</div>
+<div class="font-display-id text-display-id text-primary">150</div>
+</div>
+<!-- Active Shifts -->
+<div class="card-level-1 rounded-xl p-card-padding flex flex-col justify-between">
+<div class="flex items-center gap-2 mb-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-sm">schedule</span>
+<span class="font-label-caps text-label-caps">Active Shifts</span>
+</div>
+<div class="font-display-id text-display-id text-secondary">42</div>
+</div>
+<!-- Needs Attention -->
+<div class="card-level-1 rounded-xl p-card-padding flex flex-col justify-between bg-error-container border-error-container col-span-2 md:col-span-1">
+<div class="flex items-center gap-2 mb-2 text-on-error-container">
+<span class="material-symbols-outlined text-sm">warning</span>
+<span class="font-label-caps text-label-caps">Needs Attention</span>
+</div>
+<div class="font-display-id text-display-id text-error">3</div>
+</div>
+<!-- Unresolved Alerts -->
+<div class="card-level-1 rounded-xl p-card-padding flex flex-col justify-between">
+<div class="flex items-center gap-2 mb-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-sm">notifications_active</span>
+<span class="font-label-caps text-label-caps">Unresolved Alerts</span>
+</div>
+<div class="font-display-id text-display-id text-primary">5</div>
+</div>
+<!-- Verified Today -->
+<div class="card-level-1 rounded-xl p-card-padding flex flex-col justify-between">
+<div class="flex items-center gap-2 mb-2 text-tertiary">
+<span class="material-symbols-outlined text-sm">verified</span>
+<span class="font-label-caps text-label-caps">Verified Today</span>
+</div>
+<div class="font-display-id text-display-id text-tertiary">138</div>
+</div>
+</div>
+<!-- Alert List Section -->
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-4">Critical Alerts</h3>
+<div class="space-y-stack-gap">
+<!-- Alert Card 1 -->
+<div class="card-level-1 rounded-xl p-card-padding hover:shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05)] transition-shadow cursor-pointer border-l-4 border-l-error">
+<!-- Header -->
+<div class="flex justify-between items-start mb-3 border-b border-outline-variant pb-3">
+<div>
+<h4 class="font-headline-md text-headline-md text-on-surface">Arun Kumar</h4>
+<p class="font-body-md text-on-surface-variant">ID: 23BHS001 • Physiotherapy</p>
+</div>
+<div class="badge-amber px-2 py-1 rounded font-status-badge text-status-badge flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">error</span>
+                            Medium Severity
+                        </div>
+</div>
+<!-- Body -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+<div class="flex items-start gap-2">
+<span class="material-symbols-outlined text-on-surface-variant text-sm mt-0.5">account_circle</span>
+<div>
+<p class="font-label-caps text-label-caps text-on-surface-variant">Mentor</p>
+<p class="font-body-md text-on-surface">Dr. Anitha</p>
+</div>
+</div>
+<div class="flex items-start gap-2">
+<span class="material-symbols-outlined text-on-surface-variant text-sm mt-0.5">schedule</span>
+<div>
+<p class="font-label-caps text-label-caps text-on-surface-variant">Shift</p>
+<p class="font-body-md text-on-surface">Night 10:00 PM – 06:00 AM</p>
+</div>
+</div>
+</div>
+<!-- Alert Specifics & Footer -->
+<div class="bg-surface-container-low rounded-lg p-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+<div>
+<p class="font-label-caps text-label-caps text-error mb-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">gps_off</span>
+                                GPS Outside Geofence
+                            </p>
+<p class="font-body-md text-on-surface-variant">Logged at 03:42 AM</p>
+</div>
+<button class="bg-primary text-on-primary font-label-caps text-label-caps px-4 py-2 rounded touch-target hover:bg-primary-container transition-colors w-full sm:w-auto">
+                            Review Alert
+                        </button>
+</div>
+</div>
+<!-- Mock Alert Card 2 (Less Severe) -->
+<div class="card-level-1 rounded-xl p-card-padding hover:shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05)] transition-shadow cursor-pointer">
+<div class="flex justify-between items-start mb-3 border-b border-outline-variant pb-3">
+<div>
+<h4 class="font-headline-md text-headline-md text-on-surface">Priya Sharma</h4>
+<p class="font-body-md text-on-surface-variant">ID: 23BHS042 • Cardiology</p>
+</div>
+<div class="badge-normal px-2 py-1 rounded font-status-badge text-status-badge flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">info</span>
+                            Low Severity
+                        </div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+<div class="flex items-start gap-2">
+<span class="material-symbols-outlined text-on-surface-variant text-sm mt-0.5">account_circle</span>
+<div>
+<p class="font-label-caps text-label-caps text-on-surface-variant">Mentor</p>
+<p class="font-body-md text-on-surface">Dr. Menon</p>
+</div>
+</div>
+<div class="flex items-start gap-2">
+<span class="material-symbols-outlined text-on-surface-variant text-sm mt-0.5">schedule</span>
+<div>
+<p class="font-label-caps text-label-caps text-on-surface-variant">Shift</p>
+<p class="font-body-md text-on-surface">Day 08:00 AM – 04:00 PM</p>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-low rounded-lg p-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+<div>
+<p class="font-label-caps text-label-caps text-primary mb-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">pending_actions</span>
+                                Late Log Entry
+                            </p>
+<p class="font-body-md text-on-surface-variant">Logged at 09:15 AM</p>
+</div>
+<button class="bg-surface-container-highest text-primary font-label-caps text-label-caps px-4 py-2 rounded touch-target hover:bg-surface-variant transition-colors border border-primary-fixed-dim w-full sm:w-auto">
+                            Acknowledge
+                        </button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 w-full z-50 rounded-t-xl bg-surface border-t border-outline-variant flex justify-around items-center h-16 px-2">
+<!-- Home (Active based on Intent: Dashboard) -->
+<a class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-4 py-1 hover:bg-surface-container-low transition-all active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined filled" data-icon="home">home</span>
+<span class="font-label-caps text-label-caps mt-1">Home</span>
+</a>
+<!-- Shifts -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container-low transition-all active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="schedule">schedule</span>
+<span class="font-label-caps text-label-caps mt-1">Shifts</span>
+</a>
+<!-- Logs -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container-low transition-all active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="history_edu">history_edu</span>
+<span class="font-label-caps text-label-caps mt-1">Logs</span>
+</a>
+<!-- Profile -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container-low transition-all active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-caps text-label-caps mt-1">Profile</span>
+</a>
+</nav>
+</body></html>

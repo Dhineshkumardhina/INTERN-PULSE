@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>InternTrack - Verification Detail</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                            "surface-container-lowest": "#ffffff",
+                            "error": "#ba1a1a",
+                            "surface-tint": "#1b60a2",
+                            "outline": "#727781",
+                            "primary": "#003e6f",
+                            "surface-container-highest": "#d3e4fe",
+                            "surface": "#f8f9ff",
+                            "background": "#f8f9ff",
+                            "primary-fixed": "#d3e4ff",
+                            "secondary-fixed-dim": "#6fd7d6",
+                            "on-primary": "#ffffff",
+                            "inverse-surface": "#213145",
+                            "on-secondary-fixed-variant": "#004f4f",
+                            "surface-container-high": "#dce9ff",
+                            "on-error": "#ffffff",
+                            "on-surface-variant": "#414750",
+                            "surface-container-low": "#eff4ff",
+                            "on-background": "#0b1c30",
+                            "on-tertiary-fixed": "#002109",
+                            "on-secondary": "#ffffff",
+                            "secondary": "#006a6a",
+                            "secondary-container": "#8cf3f3",
+                            "tertiary": "#00471c",
+                            "primary-container": "#005596",
+                            "error-container": "#ffdad6",
+                            "on-secondary-container": "#007070",
+                            "outline-variant": "#c1c7d2",
+                            "on-primary-container": "#a4caff",
+                            "on-tertiary-container": "#4ce277",
+                            "inverse-primary": "#a2c9ff",
+                            "on-tertiary-fixed-variant": "#005321",
+                            "surface-variant": "#d3e4fe",
+                            "secondary-fixed": "#8cf3f3",
+                            "on-secondary-fixed": "#002020",
+                            "on-surface": "#0b1c30",
+                            "tertiary-fixed-dim": "#4ae176",
+                            "inverse-on-surface": "#eaf1ff",
+                            "tertiary-container": "#006129",
+                            "surface-container": "#e5eeff",
+                            "on-error-container": "#93000a",
+                            "surface-dim": "#cbdbf5",
+                            "primary-fixed-dim": "#a2c9ff",
+                            "on-primary-fixed-variant": "#004881",
+                            "tertiary-fixed": "#6bff8f",
+                            "surface-bright": "#f8f9ff",
+                            "on-tertiary": "#ffffff",
+                            "on-primary-fixed": "#001c38"
+                    },
+                    "borderRadius": {
+                            "DEFAULT": "0.125rem",
+                            "lg": "0.25rem",
+                            "xl": "0.5rem",
+                            "full": "0.75rem"
+                    },
+                    "spacing": {
+                            "stack-gap": "12px",
+                            "inline-gap": "8px",
+                            "card-padding": "16px",
+                            "container-padding": "16px",
+                            "unit": "4px"
+                    },
+                    "fontFamily": {
+                            "display-id": ["Inter"],
+                            "body-md": ["Inter"],
+                            "status-badge": ["Inter"],
+                            "headline-md": ["Inter"],
+                            "label-caps": ["Inter"],
+                            "headline-lg": ["Inter"],
+                            "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                            "display-id": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                            "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                            "status-badge": ["12px", {"lineHeight": "12px", "fontWeight": "600"}],
+                            "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                            "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                            "headline-lg": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                            "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background antialiased h-screen flex flex-col md:flex-row">
+<!-- Top Navigation (Web) -->
+<header class="hidden md:flex justify-between items-center w-full px-container-padding h-12 z-50 bg-surface fixed top-0 left-0 right-0 border-b-0 shadow-sm" style="transition: background-color 200ms;">
+<div class="flex items-center gap-inline-gap">
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:bg-surface-container-low p-2 rounded-full transition-colors duration-200" onclick="window.history.back()">arrow_back</span>
+<div class="font-display-id text-display-id text-primary font-bold">InternTrack</div>
+</div>
+<div class="flex items-center gap-inline-gap">
+<span class="material-symbols-outlined text-on-surface-variant p-2 rounded-full hover:bg-surface-container-low transition-colors duration-200">notifications</span>
+<div class="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-bold text-sm">SM</div>
+</div>
+</header>
+<!-- Navigation Drawer (Web) -->
+<aside class="hidden md:flex h-full w-80 rounded-r-xl bg-surface-container-low shadow-md fixed inset-y-0 left-0 z-40 flex-col pt-16 mt-12">
+<div class="p-card-padding flex flex-col gap-unit">
+<div class="font-headline-lg text-headline-lg text-primary">Dr. Sarah Mitchell</div>
+<div class="font-body-md text-body-md text-on-surface-variant">Clinical Supervisor</div>
+<div class="font-body-md text-body-md text-outline">Dept of Cardiology</div>
+</div>
+<nav class="flex flex-col gap-unit mt-stack-gap flex-1 overflow-y-auto">
+<a class="flex items-center gap-4 text-on-surface-variant px-4 py-3 mx-2 rounded-full hover:bg-surface-container-high transition-opacity active:opacity-80 font-body-md text-body-md" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+                Dashboard
+            </a>
+<a class="flex items-center gap-4 bg-primary-container text-on-primary-container rounded-full px-4 py-3 mx-2 transition-opacity active:opacity-80 font-body-md text-body-md font-bold" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">pending_actions</span>
+                Pending
+            </a>
+<a class="flex items-center gap-4 text-on-surface-variant px-4 py-3 mx-2 rounded-full hover:bg-surface-container-high transition-opacity active:opacity-80 font-body-md text-body-md" href="#">
+<span class="material-symbols-outlined">group</span>
+                Students
+            </a>
+<a class="flex items-center gap-4 text-on-surface-variant px-4 py-3 mx-2 rounded-full hover:bg-surface-container-high transition-opacity active:opacity-80 font-body-md text-body-md" href="#">
+<span class="material-symbols-outlined">account_circle</span>
+                Profile
+            </a>
+</nav>
+</aside>
+<!-- Main Content Canvas -->
+<!-- Note: Suppressed Bottom Nav on Mobile due to task focus -->
+<main class="flex-1 flex flex-col h-full overflow-y-auto md:ml-80 pt-4 md:pt-20 px-container-padding pb-24 md:pb-8">
+<!-- Mobile Header (Back Button) -->
+<div class="md:hidden flex items-center gap-inline-gap mb-stack-gap">
+<button class="material-symbols-outlined text-on-surface-variant p-2 -ml-2 rounded-full hover:bg-surface-container-low" onclick="window.history.back()">arrow_back</button>
+<h1 class="font-headline-md text-headline-md text-on-background">Review Verification Alert</h1>
+</div>
+<div class="hidden md:block mb-stack-gap">
+<h1 class="font-headline-lg text-headline-lg text-on-background">Review Verification Alert</h1>
+</div>
+<div class="max-w-3xl w-full mx-auto flex flex-col gap-stack-gap">
+<!-- Student Context Card -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-card-padding flex flex-col sm:flex-row gap-inline-gap justify-between items-start sm:items-center">
+<div class="flex items-center gap-inline-gap">
+<div class="w-12 h-12 rounded-full bg-surface-variant text-on-surface flex items-center justify-center font-display-id text-lg">
+                        AK
+                    </div>
+<div class="flex flex-col">
+<div class="font-headline-md text-headline-md text-on-background">Arun Kumar</div>
+<div class="font-body-md text-body-md text-on-surface-variant">23BHS001 • Dept: Physiotherapy</div>
+</div>
+</div>
+</section>
+<!-- Alert Detail Card -->
+<section class="bg-error-container text-on-error-container rounded-xl p-card-padding border border-[#ffb4ab] relative overflow-hidden">
+<div class="absolute top-0 right-0 w-32 h-32 bg-error opacity-5 rounded-bl-full pointer-events-none"></div>
+<div class="flex justify-between items-center mb-4">
+<h2 class="font-headline-md text-headline-md flex items-center gap-2">
+<span class="material-symbols-outlined text-error" style="font-variation-settings: 'FILL' 1;">warning</span>
+                         Failed Check Details
+                     </h2>
+<div class="bg-error bg-opacity-10 text-error font-status-badge text-status-badge px-3 py-1 rounded-full border border-error">
+                        NEEDS ATTENTION
+                     </div>
+</div>
+<div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-on-error-container opacity-80 mb-1">Time of Check</span>
+<span class="font-body-lg text-body-lg font-bold">03:42 AM</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-on-error-container opacity-80 mb-1">Distance Variance</span>
+<span class="font-body-lg text-body-lg font-bold">1.2km</span>
+</div>
+</div>
+</section>
+<!-- Timeline Card -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-card-padding">
+<h3 class="font-headline-md text-headline-md text-on-background mb-stack-gap">Shift Log</h3>
+<div class="relative pl-6 border-l-2 border-outline-variant space-y-6">
+<!-- 10:02 PM -->
+<div class="relative">
+<div class="absolute -left-[29px] top-1 w-4 h-4 rounded-full bg-surface-container-lowest border-2 border-tertiary"></div>
+<div class="flex justify-between items-center">
+<span class="font-body-md text-body-md text-on-surface-variant">10:02 PM</span>
+<span class="bg-tertiary bg-opacity-10 text-tertiary font-status-badge text-status-badge px-2 py-1 rounded-sm">VERIFIED</span>
+</div>
+</div>
+<!-- 11:31 PM -->
+<div class="relative">
+<div class="absolute -left-[29px] top-1 w-4 h-4 rounded-full bg-surface-container-lowest border-2 border-tertiary"></div>
+<div class="flex justify-between items-center">
+<span class="font-body-md text-body-md text-on-surface-variant">11:31 PM</span>
+<span class="bg-tertiary bg-opacity-10 text-tertiary font-status-badge text-status-badge px-2 py-1 rounded-sm">VERIFIED</span>
+</div>
+</div>
+<!-- 01:18 AM -->
+<div class="relative">
+<div class="absolute -left-[29px] top-1 w-4 h-4 rounded-full bg-surface-container-lowest border-2 border-tertiary"></div>
+<div class="flex justify-between items-center">
+<span class="font-body-md text-body-md text-on-surface-variant">01:18 AM</span>
+<span class="bg-tertiary bg-opacity-10 text-tertiary font-status-badge text-status-badge px-2 py-1 rounded-sm">VERIFIED</span>
+</div>
+</div>
+<!-- 03:42 AM (Alert) -->
+<div class="relative">
+<div class="absolute -left-[29px] top-1 w-4 h-4 rounded-full bg-error border-2 border-error"></div>
+<div class="flex justify-between items-center bg-error-container p-2 -mx-2 rounded-md">
+<span class="font-body-md text-body-md font-bold text-on-error-container">03:42 AM</span>
+<span class="bg-error text-on-error font-status-badge text-status-badge px-2 py-1 rounded-sm">NEEDS ATTENTION</span>
+</div>
+<div class="mt-2 ml-2">
+<div class="w-full h-32 rounded-lg bg-surface-variant overflow-hidden relative">
+<div class="w-full h-full bg-cover bg-center" data-alt="A high contrast, minimalist map interface in a clinical app setting showing a location pin that is slightly off-target. The map uses stark white and light gray tones, with a prominent red indicator highlighting a discrepancy. The overall mood is analytical and precise, suitable for a medical administrative tool." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDsUZMMeu19YOXe1nRB3XLd7JCdpMUVBVZDcrv5pV1wssVa6VVKI2m6GfWbXC8t15g1LKBMSB383HbKj-2XBOacUBbGbvKnS5tvZFFqz_RB3A99H211YhunGcF2KptWJXJNlfWVyVpOGUGJ29_zRoDKodZ8CmB66UJDYs2Vn1slLRPwGCqacvXSGvSbY5sQnl11V-Tkw73A7lDj_nWBuw1Q1UkouJMe6fos5Bc9Uc3O2PCIWE6RCWk')"></div>
+</div>
+</div>
+</div>
+<!-- 05:58 AM -->
+<div class="relative">
+<div class="absolute -left-[29px] top-1 w-4 h-4 rounded-full bg-surface-container-lowest border-2 border-tertiary"></div>
+<div class="flex justify-between items-center">
+<span class="font-body-md text-body-md text-on-surface-variant">05:58 AM</span>
+<span class="bg-tertiary bg-opacity-10 text-tertiary font-status-badge text-status-badge px-2 py-1 rounded-sm">VERIFIED</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Mentor Action Area -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-card-padding flex flex-col gap-stack-gap">
+<div class="relative">
+<label class="absolute -top-2 left-2 bg-surface-container-lowest px-1 font-label-caps text-label-caps text-on-surface-variant" for="mentor_notes">Mentor Notes</label>
+<textarea class="w-full bg-transparent border border-outline focus:border-primary focus:border-2 focus:ring-0 rounded-lg p-3 font-body-md text-body-md text-on-background placeholder-on-surface-variant resize-none" id="mentor_notes" placeholder="Enter notes regarding this alert..." rows="3"></textarea>
+</div>
+<div class="flex justify-end mt-4">
+<button class="bg-primary text-on-primary font-headline-md text-headline-md h-12 px-6 rounded-full flex items-center justify-center gap-2 hover:bg-primary-container hover:text-on-primary-container transition-colors active:scale-95 duration-150">
+<span class="material-symbols-outlined">check_circle</span>
+                        Mark as Reviewed
+                    </button>
+</div>
+</section>
+</div>
+</main>
+</body></html>
