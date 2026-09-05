@@ -70,6 +70,11 @@ export interface Student {
   shift_status?: ShiftStatus;
   is_night_shift: boolean;
   is_active_shift: boolean;
+  scheduled_start_time?: string;
+  actual_start_time?: string;
+  scheduled_end_time?: string;
+  actual_end_time?: string;
+  random_check_times?: string[];
   shift_started_at?: string;
   shift_ended_at?: string;
   current_status: VerificationStatus;
@@ -202,7 +207,11 @@ export interface GpsVerification {
   latitude: number;
   longitude: number;
   is_inside_geofence: boolean;
-  verification_type: 'SHIFT_START' | 'RANDOM_PROMPT' | 'MANUAL' | 'SCHEDULED';
+  verification_type: 'SHIFT_START' | 'RANDOM_CHECK' | 'RANDOM_PROMPT' | 'MANUAL' | 'SCHEDULED' | 'SHIFT_END';
+  reviewed_by?: string;
+  reviewed_at?: string;
+  review_status?: string;
+  review_notes?: string;
   review_details?: {
     reviewer_name: string;
     reviewed_at: string;

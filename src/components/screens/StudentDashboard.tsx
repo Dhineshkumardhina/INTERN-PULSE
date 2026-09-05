@@ -273,13 +273,13 @@ export const StudentDashboard: React.FC = () => {
 
           <div className="bg-surface-container-low rounded-xl p-2.5 border border-outline-variant/30 grid grid-cols-2 gap-2 text-xs">
             <div>
-              <span className="text-[10px] text-on-surface-variant block">Shift Commencement</span>
-              <span className="font-bold text-on-surface font-mono">10:02 PM</span>
+              <span className="text-[10px] text-on-surface-variant block">Shift Started</span>
+              <span className="font-bold text-on-surface font-mono">{student.actual_start_time || '10:02 PM'}</span>
             </div>
             <div>
-              <span className="text-[10px] text-on-surface-variant block">Active Timer</span>
+              <span className="text-[10px] text-on-surface-variant block">Random Verification</span>
               <span className="font-bold text-primary font-mono">
-                {student.is_active_shift ? '05h 42m elapsed' : 'Duty Inactive'}
+                {student.is_active_shift ? 'Random verification active' : 'Duty Inactive'}
               </span>
             </div>
           </div>

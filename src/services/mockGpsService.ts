@@ -80,6 +80,43 @@ export class MockGpsService {
   }
 
   /**
+   * Generates EXACTLY 5 RANDOM GPS VERIFICATION CHECKS during the student's configured shift window.
+   * Handles night shifts crossing midnight correctly as one continuous interval.
+   */
+  public static generateFiveRandomCheckTimes(
+    startTimeStr: string = '22:00',
+    endTimeStr: string = '06:00',
+    isNightShift: boolean = true
+  ): string[] {
+    let startHour = 22;
+    let startMin = 0;
+    if (startTimeStr && startTimeStr.includes(':')) {
+      const parts = startTimeStr.split(':');
+      startHour = parseInt(parts[0], 10) || 22;
+      startMin = parseInt(parts[1], 10) || 0;
+    }
+
+    const durationMins = isNightShift ? 8 * 60 : 7.5 * 60;
+    const checkTimes: string[] = [];
+    const segmentSize = durationMins / 6.0;
+
+    for (let i = 1; i <= 5; i++) {
+      const minOffset = Math.floor(segmentSize * (i - 1) + segmentSize * 0.2 + Math.random() * (segmentSize * 0.6));
+      const totalMins = startMin + minOffset;
+      const totalHours = startHour + Math.floor(totalMins / 60);
+      const mins = totalMins % 60;
+      const hour24 = totalHours % 24;
+
+      const h12 = hour24 % 12 === 0 ? 12 : hour24 % 12;
+      const ampm = hour24 >= 12 ? 'PM' : 'AM';
+      const formattedMin = mins < 10 ? `0${mins}` : `${mins}`;
+      checkTimes.push(`${h12}:${formattedMin} ${ampm}`);
+    }
+
+    return checkTimes;
+  }
+
+  /**
    * Generates unpredictable, random verification check times for an 8-hour shift
    * Night shift: 11:18 PM, 01:42 AM, 03:15 AM, 04:50 AM
    */

@@ -754,6 +754,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const targetReg = currentUser?.role === 'STUDENT' ? (currentUser.registerNumber || regNumber) : regNumber;
     const student = students.find((s) => s.register_number === targetReg) || students[0];
     
+    const startTimeStr = student.shift_time?.split(' – ')[0] || (student.is_night_shift ? '10:00 PM' : '08:30 AM');
+    const endTimeStr = student.shift_time?.split(' – ')[1] || (student.is_night_shift ? '06:00 AM' : '04:00 PM');
+    const randomTimes = MockGpsService.generateFiveRandomCheckTimes(startTimeStr, endTimeStr, student.is_night_shift);
+    const actualStartTime = MockGpsService.getCurrentTimeString();
+
     const result = await performGpsVerification(gpsMode, student.is_night_shift ? '10:02 PM' : '08:30 AM', 'SHIFT_START');
     
     // Strict requirement: Shift ONLY activates if GPS verification succeeds (VERIFIED)
@@ -765,6 +770,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 ...s,
                 is_active_shift: true,
                 shift_status: 'ACTIVE',
+                scheduled_start_time: startTimeStr,
+                actual_start_time: actualStartTime,
+                scheduled_end_time: endTimeStr,
+                random_check_times: randomTimes,
                 shift_started_at: new Date().toISOString(),
                 current_status: 'VERIFIED',
                 last_verified_at: result.time_display,
@@ -781,10 +790,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const endShift = (regNumber: string) => {
+    const actualEndTime = MockGpsService.getCurrentTimeString();
     setStudents((prev) =>
       prev.map((s) =>
         s.register_number === regNumber
-          ? { ...s, is_active_shift: false, shift_status: 'COMPLETED', current_status: 'OFF SHIFT' }
+          ? {
+              ...s,
+              is_active_shift: false,
+              shift_status: 'COMPLETED',
+              actual_end_time: actualEndTime,
+              current_status: 'OFF SHIFT',
+            }
           : s
       )
     );
@@ -800,7 +816,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const attention = studentVerifications.filter((v) => v.status === 'NEEDS ATTENTION').length;
 
     const summary: CheckOutSummaryData = {
-      startTime: '10:02 PM',
+      startTime: student.actual_start_time || '10:02 PM',
       endTime: nowTimeStr || '06:01 AM',
       successfulVerifications: successful || 3,
       needsAttentionEvents: attention || 1,
@@ -817,6 +833,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               ...s,
               is_active_shift: false,
               shift_status: 'COMPLETED',
+              actual_end_time: nowTimeStr,
               current_status: 'OFF SHIFT',
             }
           : s
