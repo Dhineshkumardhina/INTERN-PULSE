@@ -414,30 +414,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const trimmed = identifier.trim().toLowerCase();
     const cleanPwd = (password || '').trim();
 
-    if (!trimmed) return false;
+    if (!trimmed || !cleanPwd) return false;
 
-    // Helper to validate role password
-    const isPasswordValidForRole = (role: UserRole, expectedPwd?: string): boolean => {
-      // If no password provided, require something
-      if (!cleanPwd) return false;
-
-      // Allow exact or case-insensitive match
-      if (expectedPwd && cleanPwd.toLowerCase() === expectedPwd.toLowerCase()) return true;
-
-      // Role-specific fallback/canonical passwords
-      const adminPwds = ['admin@smvmch2026', 'admin@ahs2026', 'admin@2026', 'admin123', 'admin', 'password', '123456'];
-      const hodPwds = ['hod@cct2026', 'hod@physio2026', 'hod@ahs2026', 'hod@2026', 'hod123', 'hod', 'password', '123456'];
-      const mentorPwds = ['mentor@priya2026', 'mentor@anitha2026', 'mentor@ahs2026', 'mentor@2026', 'mentor123', 'mentor', 'password', '123456'];
-      const studentPwds = ['student@23ucct001', 'student@23bhs001', 'student@23bhs', 'student@2026', 'intern@2026', 'student123', 'student', 'password', '123456'];
-
+    // Helper to validate role password strictly
+    const isPasswordValidForRole = (role: UserRole): boolean => {
       const lowerPwd = cleanPwd.toLowerCase();
-      if (role === 'ADMIN' && (adminPwds.includes(lowerPwd) || lowerPwd.includes('admin'))) return true;
-      if (role === 'HOD' && (hodPwds.includes(lowerPwd) || lowerPwd.includes('hod'))) return true;
-      if (role === 'MENTOR' && (mentorPwds.includes(lowerPwd) || lowerPwd.includes('mentor') || lowerPwd.includes('priya'))) return true;
-      if (role === 'STUDENT' && (studentPwds.includes(lowerPwd) || lowerPwd.startsWith('student') || lowerPwd.startsWith('intern'))) return true;
-
-      // If user enters any password with length >= 3 for demo prototype, accept
-      return cleanPwd.length >= 3;
+      if (role === 'ADMIN') {
+        return lowerPwd === 'admin@2026' || lowerPwd === 'admin123';
+      }
+      if (role === 'HOD') {
+        return lowerPwd === 'hod@2026' || lowerPwd === 'hod123';
+      }
+      if (role === 'MENTOR') {
+        return lowerPwd === 'mentor@2026' || lowerPwd === 'mentor123';
+      }
+      if (role === 'STUDENT') {
+        return lowerPwd === 'student@2026' || lowerPwd === 'student123';
+      }
+      return false;
     };
 
     // Alias mapping for quick access
@@ -449,7 +443,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         matchedKey = 'hod01';
       } else if (trimmed === 'mentor' || trimmed === 'priya' || trimmed.includes('mentor')) {
         matchedKey = 'mentor01';
-      } else if (trimmed === 'student' || trimmed === 'intern' || trimmed === '23bhs001') {
+      } else if (trimmed === 'student' || trimmed === 'intern' || trimmed === '23ucct001' || trimmed === '23bhs001') {
         matchedKey = '23UCCT001';
       }
     }
@@ -457,7 +451,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (matchedKey && DEMO_USERS[matchedKey]) {
       const user = DEMO_USERS[matchedKey];
       
-      if (!isPasswordValidForRole(user.role, user.password)) {
+      if (!isPasswordValidForRole(user.role)) {
         return false;
       }
 
@@ -480,8 +474,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       (s) => s.register_number.toLowerCase() === trimmed || s.name.toLowerCase().includes(trimmed)
     );
     if (foundStudent) {
-      const expectedStudentPwd = `Student@${foundStudent.register_number.toLowerCase()}`;
-      if (!isPasswordValidForRole('STUDENT', expectedStudentPwd)) {
+      if (!isPasswordValidForRole('STUDENT')) {
         return false;
       }
 
@@ -492,19 +485,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         role: 'STUDENT',
         department: foundStudent.department,
         avatar: foundStudent.avatar,
-        password: expectedStudentPwd,
+        password: 'Student@2026',
       };
       setCurrentUser(studentUser);
       setSelectedStudent(foundStudent.register_number);
-      setCurrentScreen('student_dashboard');
-      return true;
-    }
-
-    // Default fallback: if any unrecognized username is provided with any password, log in as default student
-    if (cleanPwd) {
-      const defaultUser = DEMO_USERS['23UCCT001'];
-      setCurrentUser(defaultUser);
-      setSelectedStudent(defaultUser.registerNumber || '23UCCT001');
       setCurrentScreen('student_dashboard');
       return true;
     }

@@ -2322,7 +2322,7 @@ export const DEMO_USERS: Record<string, UserProfile> = {
     department: 'Critical Care Technology',
     email: '23ucct001@smvmch.edu.in',
     avatar: getAvatar(0),
-    password: 'Student@23ucct001',
+    password: 'Student@2026',
   },
   mentor01: {
     id: 'mentor_cct_01',
@@ -2331,7 +2331,7 @@ export const DEMO_USERS: Record<string, UserProfile> = {
     department: 'Critical Care Technology',
     email: 'dr.priya@smvmch.edu.in',
     avatar: 'https://images.unsplash.com/photo-1594824813589-3221e7d23d8c?w=150&auto=format&fit=crop&q=80',
-    password: 'Mentor@priya2026',
+    password: 'Mentor@2026',
   },
   hod01: {
     id: 'hod_cct',
@@ -2340,7 +2340,7 @@ export const DEMO_USERS: Record<string, UserProfile> = {
     department: 'Critical Care Technology',
     email: 'hod.cct@smvmch.edu.in',
     avatar: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=150&auto=format&fit=crop&q=80',
-    password: 'Hod@cct2026',
+    password: 'Hod@2026',
   },
   admin01: {
     id: 'admin01',
@@ -2349,6 +2349,6 @@ export const DEMO_USERS: Record<string, UserProfile> = {
     department: 'School of Allied Health Sciences',
     email: 'admin.ahs@smvmch.edu.in',
     avatar: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=150&auto=format&fit=crop&q=80',
-    password: 'Admin@smvmch2026',
+    password: 'Admin@2026',
   },
 };
