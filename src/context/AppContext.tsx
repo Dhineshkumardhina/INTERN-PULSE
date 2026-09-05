@@ -16,6 +16,8 @@ import {
   StudentAttendanceRecord,
   StudentNotification,
   MentorNotification,
+  ShiftSession,
+  ScheduledRandomCheck,
 } from '../types';
 import {
   INITIAL_STUDENTS,
@@ -31,6 +33,8 @@ import {
   HOSPITAL_CONFIG,
   INITIAL_ATTENDANCE_RECORDS,
   INITIAL_STUDENT_NOTIFICATIONS,
+  INITIAL_SHIFT_SESSIONS,
+  INITIAL_SCHEDULED_CHECKS,
 } from '../services/mockData';
 import { MockGpsService } from '../services/mockGpsService';
 
@@ -52,6 +56,11 @@ interface AppContextType {
   hods: Hod[];
   departments: Department[];
   shifts: Shift[];
+  shiftSessions: ShiftSession[];
+  getActiveShiftSession: (regNumber?: string) => ShiftSession | null;
+  scheduledRandomChecks: ScheduledRandomCheck[];
+  getScheduledChecksForSession: (sessionId: string) => ScheduledRandomCheck[];
+  executeScheduledRandomCheck: (checkId: string, forcedMode?: GpsSimulationMode) => Promise<{ check: ScheduledRandomCheck; verification: GpsVerification }>;
   verifications: GpsVerification[];
   alerts: DepartmentAlert[];
   activityLogs: AdminActivityLog[];
@@ -241,6 +250,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return INITIAL_ATTENDANCE_RECORDS;
     }
   });
+  const [shiftSessions, setShiftSessions] = useState<ShiftSession[]>(() => {
+    try {
+      const saved = localStorage.getItem('interntrack_shift_sessions');
+      return saved ? JSON.parse(saved) : INITIAL_SHIFT_SESSIONS;
+    } catch {
+      return INITIAL_SHIFT_SESSIONS;
+    }
+  });
+  const [scheduledRandomChecks, setScheduledRandomChecks] = useState<ScheduledRandomCheck[]>(() => {
+    try {
+      const saved = localStorage.getItem('interntrack_scheduled_random_checks');
+      return saved ? JSON.parse(saved) : INITIAL_SCHEDULED_CHECKS;
+    } catch {
+      return INITIAL_SCHEDULED_CHECKS;
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('interntrack_scheduled_random_checks', JSON.stringify(scheduledRandomChecks));
+    } catch {}
+  }, [scheduledRandomChecks]);
+
   const [studentNotifications, setStudentNotifications] = useState<StudentNotification[]>(() => INITIAL_STUDENT_NOTIFICATIONS);
   const [mentorNotifications, setMentorNotifications] = useState<MentorNotification[]>(() => INITIAL_MENTOR_NOTIFICATIONS);
   
@@ -248,6 +280,79 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [currentScreen, setRawCurrentScreen] = useState<string>('login');
   const [selectedStudentRegisterNumber, setSelectedStudentState] = useState<string | null>('23UCCT001');
   const [selectedAlertId, setSelectedAlert] = useState<string | null>('alert_lourdhe_01');
+
+  const getActiveShiftSession = (regNumber?: string): ShiftSession | null => {
+    const targetReg = regNumber || (currentUser?.role === 'STUDENT' ? currentUser.registerNumber : selectedStudentRegisterNumber) || '23UCCT001';
+    return shiftSessions.find((s) => s.register_number.toLowerCase() === targetReg.toLowerCase() && s.status === 'ACTIVE') || null;
+  };
+
+  const getScheduledChecksForSession = (sessionId: string): ScheduledRandomCheck[] => {
+    return scheduledRandomChecks.filter((c) => c.shift_session_id === sessionId);
+  };
+
+  const executeScheduledRandomCheck = async (
+    checkId: string,
+    forcedMode?: GpsSimulationMode
+  ): Promise<{ check: ScheduledRandomCheck; verification: GpsVerification }> => {
+    const check = scheduledRandomChecks.find((c) => c.id === checkId);
+    if (!check) {
+      throw new Error(`Scheduled check not found: ${checkId}`);
+    }
+
+    // Duplicate execution protection: If check has already completed, return existing data
+    if (check.status !== 'SCHEDULED' && check.status !== 'EXECUTING') {
+      const existingVerification = verifications.find((v) => v.timestamp === check.executed_at) || verifications[0];
+      return { check, verification: existingVerification };
+    }
+
+    const targetStudent = students.find((s) => s.register_number.toLowerCase() === check.register_number.toLowerCase()) || students[0];
+    const { check: updatedCheck, verification } = MockGpsService.executeScheduledCheck(
+      check,
+      targetStudent,
+      forcedMode || gpsMode,
+      hospitalGeofence
+    );
+
+    // Persist updated check status
+    setScheduledRandomChecks((prev) =>
+      prev.map((c) => (c.id === checkId ? updatedCheck : c))
+    );
+
+    // Record immutable verification
+    setVerifications((prev) => [verification, ...prev]);
+    setLastVerification(verification);
+
+    // If verification failed or needs attention, create DepartmentAlert
+    if (
+      verification.status === 'NEEDS ATTENTION' ||
+      verification.status === 'GPS UNAVAILABLE' ||
+      verification.status === 'PERMISSION DENIED' ||
+      verification.status === 'LOW ACCURACY'
+    ) {
+      const alert: DepartmentAlert = {
+        id: `alert_${Date.now()}`,
+        verification_id: verification.id,
+        register_number: targetStudent.register_number,
+        student_name: targetStudent.name,
+        department: targetStudent.department,
+        mentor_id: targetStudent.mentor_id,
+        mentor_name: targetStudent.mentor_name,
+        shift_name: targetStudent.shift_name,
+        triggered_at: new Date().toISOString(),
+        time_display: verification.time_display,
+        status: 'NEEDS ATTENTION',
+        distance_meters: verification.distance_meters,
+        accuracy_meters: verification.accuracy_meters,
+        reason:
+          verification.status === 'NEEDS ATTENTION'
+            ? `Student is ${verification.distance_meters}m outside hospital perimeter during random check #${check.check_number}`
+            : `GPS verification issue: ${verification.status} during random check #${check.check_number}`,
+      };
+      setAlerts((prev) => [alert, ...prev]);
+    }
+
+    return { check: updatedCheck, verification };
+  };
 
   // Guarded setCurrentScreen strictly enforcing role hierarchy access
   const setCurrentScreen = (screen: string) => {
@@ -675,8 +780,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       })
     );
 
-    // If outside geofence (NEEDS ATTENTION), automatically push an alert to mentor/HOD/admin
-    if (result.status === 'NEEDS ATTENTION') {
+    // If not verified (NEEDS ATTENTION, GPS UNAVAILABLE, PERMISSION DENIED, LOW ACCURACY), automatically push an alert to mentor and HOD
+    if (result.status !== 'VERIFIED') {
+      let alertReason = `Geofence Breach: ${result.distance_meters}m outside hospital perimeter during ${targetStudent.shift_name || 'Active Clinical Shift'}.`;
+      if (result.status === 'GPS UNAVAILABLE') {
+        alertReason = `GPS Unavailable: Location hardware or service is disabled during ${targetStudent.shift_name || 'Active Clinical Shift'}.`;
+      } else if (result.status === 'PERMISSION DENIED') {
+        alertReason = `Location Permission Denied: Device location access was blocked during ${targetStudent.shift_name || 'Active Clinical Shift'}.`;
+      } else if (result.status === 'LOW ACCURACY') {
+        alertReason = `Low GPS Accuracy: Accuracy of ±${result.accuracy_meters}m exceeds permissible threshold (${GPS_ACCURACY_THRESHOLD_METERS}m).`;
+      }
+
       const newAlert: DepartmentAlert = {
         id: `alert_${Date.now()}`,
         verification_id: result.id,
@@ -691,7 +805,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         status: 'NEEDS ATTENTION',
         distance_meters: result.distance_meters,
         accuracy_meters: result.accuracy_meters,
-        reason: `Geofence Breach: ${result.distance_meters}m outside hospital perimeter during ${targetStudent.shift_name || 'Active Clinical Shift'}.`,
+        reason: alertReason,
       };
       setAlerts((prev) => [newAlert, ...prev]);
       setSelectedAlert(newAlert.id);
@@ -701,8 +815,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         id: `mnotif_${Date.now()}`,
         mentor_id: targetStudent.mentor_id,
         type: 'NEEDS_ATTENTION_ALERT',
-        title: `Geofence Anomaly - ${targetStudent.name}`,
-        message: `Intern ${targetStudent.name} (${targetStudent.register_number}) recorded a ${result.distance_meters}m distance check during ${targetStudent.shift_name}. Contextual review required.`,
+        title: `GPS Verification Alert - ${targetStudent.name}`,
+        message: `Student: ${targetStudent.name} (${targetStudent.register_number}) • Shift: ${targetStudent.shift_name} • Check Time: ${result.time_display} • Reason: ${alertReason}`,
         student_register_number: targetStudent.register_number,
         student_name: targetStudent.name,
         alert_id: newAlert.id,
@@ -750,56 +864,121 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const startShift = async (regNumber: string): Promise<GpsVerification> => {
-    // RBAC Security: Student cannot start shift for another register number
+    // 1. Verify that student is authenticated
     const targetReg = currentUser?.role === 'STUDENT' ? (currentUser.registerNumber || regNumber) : regNumber;
-    const student = students.find((s) => s.register_number === targetReg) || students[0];
+    const student = students.find((s) => s.register_number.toLowerCase() === targetReg.toLowerCase()) || students[0];
     
+    // 2. Duplicate Start Protection: Check if an active session already exists for this student
+    const existingActiveSession = shiftSessions.find(
+      (s) => s.register_number.toLowerCase() === student.register_number.toLowerCase() && s.status === 'ACTIVE'
+    );
+    if (existingActiveSession) {
+      console.log(`[Shift Lifecycle] Active session already exists for ${student.register_number} (${existingActiveSession.shift_session_id}). Returning existing active session.`);
+      closeStartShiftModal();
+      setCurrentScreen('active_shift');
+      const lastCheck = lastVerification || verifications.find((v) => v.register_number === student.register_number);
+      if (lastCheck) return lastCheck;
+    }
+
+    // 3. Load currently assigned shift & calculate continuous datetime range
     const startTimeStr = student.shift_time?.split(' – ')[0] || (student.is_night_shift ? '10:00 PM' : '08:30 AM');
     const endTimeStr = student.shift_time?.split(' – ')[1] || (student.is_night_shift ? '06:00 AM' : '04:00 PM');
+    const shiftRange = MockGpsService.calculateShiftDateTimeRange(startTimeStr, endTimeStr, student.is_night_shift);
     const randomTimes = MockGpsService.generateFiveRandomCheckTimes(startTimeStr, endTimeStr, student.is_night_shift);
     const actualStartTime = MockGpsService.getCurrentTimeString();
 
+    // 4. Obtain current GPS location & perform initial geofence verification
     const result = await performGpsVerification(gpsMode, student.is_night_shift ? '10:02 PM' : '08:30 AM', 'SHIFT_START');
     
-    // Strict requirement: Shift ONLY activates if GPS verification succeeds (VERIFIED)
-    if (result.status === 'VERIFIED') {
-      setStudents((prev) =>
-        prev.map((s) =>
-          s.register_number === student.register_number
-            ? {
-                ...s,
-                is_active_shift: true,
-                shift_status: 'ACTIVE',
-                scheduled_start_time: startTimeStr,
-                actual_start_time: actualStartTime,
-                scheduled_end_time: endTimeStr,
-                random_check_times: randomTimes,
-                shift_started_at: new Date().toISOString(),
-                current_status: 'VERIFIED',
-                last_verified_at: result.time_display,
-                last_verification_distance: result.distance_meters,
-                last_verification_accuracy: result.accuracy_meters,
-              }
-            : s
-        )
-      );
-      closeStartShiftModal();
-      setCurrentScreen('active_shift');
-    }
+    // 5. Create immutable active shift session
+    const sessionId = `session_${student.register_number.toLowerCase()}_${Date.now()}`;
+    const newSession: ShiftSession = {
+      shift_session_id: sessionId,
+      register_number: student.register_number,
+      student_name: student.name,
+      shift_id: student.shift_id || 'shift_default',
+      shift_name: student.shift_name || 'Assigned Duty Shift',
+      department: student.department,
+      mentor_id: student.mentor_id,
+      mentor_name: student.mentor_name,
+      scheduled_start: startTimeStr,
+      scheduled_end: endTimeStr,
+      start_datetime: shiftRange.startIso,
+      end_datetime: shiftRange.endIso,
+      actual_start: actualStartTime,
+      initial_latitude: result.latitude,
+      initial_longitude: result.longitude,
+      initial_accuracy: result.accuracy_meters,
+      initial_distance: result.distance_meters,
+      initial_status: result.status,
+      status: 'ACTIVE',
+      created_at: new Date().toISOString(),
+    };
+
+    setShiftSessions((prev) => [newSession, ...prev]);
+
+    // Generate exactly 5 random scheduled checks for the active shift session
+    const scheduledChecks = MockGpsService.generateFiveRandomScheduledChecks(newSession);
+    setScheduledRandomChecks((prev) => [...scheduledChecks, ...prev]);
+
+    // 6. Update student record state (preserving scheduled and actual times)
+    setStudents((prev) =>
+      prev.map((s) =>
+        s.register_number.toLowerCase() === student.register_number.toLowerCase()
+          ? {
+              ...s,
+              is_active_shift: true,
+              shift_status: 'ACTIVE',
+              scheduled_start_time: startTimeStr,
+              actual_start_time: actualStartTime,
+              scheduled_end_time: endTimeStr,
+              random_check_times: randomTimes,
+              active_session_id: sessionId,
+              shift_started_at: new Date().toISOString(),
+              current_status: result.status,
+              last_verified_at: result.time_display,
+              last_verification_distance: result.distance_meters,
+              last_verification_accuracy: result.accuracy_meters,
+            }
+          : s
+      )
+    );
+
+    closeStartShiftModal();
+    setCurrentScreen('active_shift');
     return result;
   };
 
   const endShift = (regNumber: string) => {
     const actualEndTime = MockGpsService.getCurrentTimeString();
+    
+    // Update active session in shiftSessions with calculated duration
+    setShiftSessions((prev) =>
+      prev.map((session) => {
+        if (session.register_number.toLowerCase() === regNumber.toLowerCase() && session.status === 'ACTIVE') {
+          const duration = MockGpsService.calculateShiftDuration(session.start_datetime || session.actual_start, new Date());
+          return {
+            ...session,
+            status: 'COMPLETED',
+            actual_end: actualEndTime,
+            shift_duration: duration,
+            ended_at: new Date().toISOString(),
+          };
+        }
+        return session;
+      })
+    );
+
     setStudents((prev) =>
       prev.map((s) =>
-        s.register_number === regNumber
+        s.register_number.toLowerCase() === regNumber.toLowerCase()
           ? {
               ...s,
               is_active_shift: false,
               shift_status: 'COMPLETED',
               actual_end_time: actualEndTime,
               current_status: 'OFF SHIFT',
+              active_session_id: undefined,
             }
           : s
       )
@@ -807,13 +986,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const confirmCheckOut = (regNumber: string) => {
-    const student = students.find((s) => s.register_number === regNumber) || students[0];
+    const student = students.find((s) => s.register_number.toLowerCase() === regNumber.toLowerCase()) || students[0];
     const nowTimeStr = MockGpsService.getCurrentTimeString();
     
     // Count successful vs needs attention verifications for this student
-    const studentVerifications = verifications.filter((v) => v.register_number === student.register_number);
+    const studentVerifications = verifications.filter((v) => v.register_number.toLowerCase() === student.register_number.toLowerCase());
     const successful = studentVerifications.filter((v) => v.status === 'VERIFIED').length;
     const attention = studentVerifications.filter((v) => v.status === 'NEEDS ATTENTION').length;
+
+    // Calculate duration & complete active session in shiftSessions
+    let sessionDuration = '8.0 hrs';
+    setShiftSessions((prev) =>
+      prev.map((session) => {
+        if (session.register_number.toLowerCase() === student.register_number.toLowerCase() && session.status === 'ACTIVE') {
+          sessionDuration = MockGpsService.calculateShiftDuration(session.start_datetime || session.actual_start, new Date());
+          return {
+            ...session,
+            status: 'COMPLETED',
+            actual_end: nowTimeStr,
+            shift_duration: sessionDuration,
+            ended_at: new Date().toISOString(),
+          };
+        }
+        return session;
+      })
+    );
 
     const summary: CheckOutSummaryData = {
       startTime: student.actual_start_time || '10:02 PM',
@@ -822,19 +1019,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       needsAttentionEvents: attention || 1,
       finalStatus: 'COMPLETED',
       shiftName: student.shift_name || 'Night Shift',
-      hoursLogged: '8.0 hrs',
+      hoursLogged: sessionDuration,
     };
 
     // Update student state
     setStudents((prev) =>
       prev.map((s) =>
-        s.register_number === student.register_number
+        s.register_number.toLowerCase() === student.register_number.toLowerCase()
           ? {
               ...s,
               is_active_shift: false,
               shift_status: 'COMPLETED',
               actual_end_time: nowTimeStr,
               current_status: 'OFF SHIFT',
+              active_session_id: undefined,
             }
           : s
       )
@@ -848,12 +1046,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       date_iso: new Date().toISOString().split('T')[0],
       shift_name: student.shift_name.replace(' Shift', '') || 'Night',
       time_window: student.shift_time || '10:00 PM – 06:00 AM',
-      start_time: '10:02 PM',
+      start_time: student.actual_start_time || '10:02 PM',
       end_time: summary.endTime,
       status: 'COMPLETED',
       verified_checks: successful || 3,
       total_checks: (successful || 3) + (attention || 1),
-      hours_logged: '8.0 hrs',
+      hours_logged: sessionDuration,
       mentor_name: student.mentor_name,
       period_group: 'THIS_WEEK',
     };
@@ -865,16 +1063,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       register_number: student.register_number,
       type: 'SHIFT_COMPLETED',
       title: 'Shift Successfully Completed & Checked Out',
-      message: `Your ${student.shift_name} has concluded at ${summary.endTime}. Attendance logged as COMPLETED (8.0 hours credited).`,
+      message: `Your ${student.shift_name} clinical shift has been marked COMPLETED. Shift duration: ${sessionDuration}. All verification records and GPS events have been recorded.`,
       timestamp: new Date().toISOString(),
-      time_display: summary.endTime,
+      time_display: nowTimeStr,
       is_read: false,
       priority: 'NORMAL',
     };
-    setStudentNotifications((prev) => [completionNotif, ...prev]);
-
-    setIsCheckOutModalOpen(false);
     setActiveCheckOutSummary(summary);
+    closeCheckOutModal();
+    setCurrentScreen('student_dashboard');
   };
 
   const triggerRandomVerificationPrompt = (customTime = '03:42 AM') => {
@@ -2159,6 +2356,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         hods: scopedHods,
         departments,
         shifts,
+        shiftSessions,
+        getActiveShiftSession,
+        scheduledRandomChecks,
+        getScheduledChecksForSession,
+        executeScheduledRandomCheck,
         verifications: scopedVerifications,
         alerts: scopedAlerts,
         activityLogs: currentUser?.role === 'ADMIN' ? activityLogs : [],

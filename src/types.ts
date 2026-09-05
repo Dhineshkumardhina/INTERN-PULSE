@@ -84,6 +84,58 @@ export interface Student {
   avatar?: string;
   is_active?: boolean;
   schedules?: StudentScheduleEntry[];
+  active_session_id?: string;
+}
+
+export interface ShiftSession {
+  shift_session_id: string;
+  register_number: string;
+  student_name?: string;
+  shift_id: string;
+  shift_name: string;
+  department: string;
+  mentor_id: string;
+  mentor_name?: string;
+  scheduled_start: string;
+  scheduled_end: string;
+  start_datetime: string;
+  end_datetime: string;
+  actual_start: string;
+  actual_end?: string;
+  shift_duration?: string;
+  initial_latitude: number;
+  initial_longitude: number;
+  initial_accuracy: number;
+  initial_distance: number;
+  initial_status: VerificationStatus;
+  status: 'ACTIVE' | 'COMPLETED' | 'EXPIRED' | 'NOT STARTED' | 'NEEDS ATTENTION';
+  created_at: string;
+  ended_at?: string;
+}
+
+export interface ScheduledRandomCheck {
+  id: string; // unique id, e.g. `check_${shift_session_id}_${check_number}`
+  shift_session_id: string;
+  register_number: string;
+  student_id: string;
+  student_name?: string;
+  mentor_id?: string;
+  mentor_name?: string;
+  department?: string;
+  check_number: 1 | 2 | 3 | 4 | 5;
+  scheduled_time: string; // "HH:MM" e.g. "10:48 PM"
+  scheduled_datetime: string; // full ISO-8601 string
+  status: 'SCHEDULED' | 'EXECUTING' | 'VERIFIED' | 'NEEDS ATTENTION' | 'GPS UNAVAILABLE' | 'PERMISSION DENIED' | 'LOW ACCURACY' | 'MISSED' | 'COMPLETED';
+  executed_at?: string;
+  latitude?: number;
+  longitude?: number;
+  accuracy?: number;
+  distance_from_hospital?: number;
+  geofence_radius?: number;
+  gps_state?: string;
+  permission_state?: string;
+  result?: VerificationStatus;
+  created_at: string;
 }
 
 export interface StudentAttendanceRecord {
@@ -193,11 +245,14 @@ export interface Shift {
 
 export interface GpsVerification {
   id: string;
+  verification_id?: string;
   register_number: string;
+  student_id?: string;
   student_name: string;
   department: string;
   mentor_id?: string;
   mentor_name?: string;
+  shift_session_id?: string;
   shift_name?: string;
   timestamp: string; // ISO string
   time_display: string; // e.g. "03:42 AM"
@@ -206,6 +261,9 @@ export interface GpsVerification {
   accuracy_meters: number;
   latitude: number;
   longitude: number;
+  geofence_radius?: number;
+  gps_state?: string;
+  permission_state?: string;
   is_inside_geofence: boolean;
   verification_type: 'SHIFT_START' | 'RANDOM_CHECK' | 'RANDOM_PROMPT' | 'MANUAL' | 'SCHEDULED' | 'SHIFT_END';
   reviewed_by?: string;
@@ -224,16 +282,20 @@ export interface DepartmentAlert {
   id: string;
   verification_id: string;
   register_number: string;
+  student_id?: string;
   student_name: string;
   department: string;
   mentor_id: string;
   mentor_name: string;
   shift_name?: string;
+  title?: string; // "GPS Verification Alert"
   triggered_at: string;
   time_display: string;
-  status: 'NEEDS ATTENTION' | 'REVIEWED';
+  status: 'UNREAD' | 'READ' | 'NEEDS ATTENTION' | 'REVIEWED' | 'RESOLVED';
+  alert_state?: 'UNREAD' | 'READ' | 'REVIEWED' | 'RESOLVED';
   distance_meters: number;
   accuracy_meters: number;
+  geofence_radius?: number;
   reason: string;
   reviewed_by?: string;
   reviewed_at?: string;

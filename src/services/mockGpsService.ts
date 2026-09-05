@@ -1,4 +1,4 @@
-import { GpsSimulationMode, GpsVerification, HospitalGeofence, Student, VerificationStatus } from '../types';
+import { GpsSimulationMode, GpsVerification, HospitalGeofence, Student, VerificationStatus, ShiftSession, ScheduledRandomCheck } from '../types';
 import { HOSPITAL_CONFIG } from './mockData';
 
 export const GPS_ACCURACY_THRESHOLD_METERS = 50; // Maximum acceptable GPS accuracy in meters
@@ -80,6 +80,82 @@ export class MockGpsService {
   }
 
   /**
+   * Parses time strings such as "10:00 PM", "22:00", "09:00 AM" into hours and minutes (24-hour format)
+   */
+  public static parseTimeStrToHoursMinutes(timeStr: string): { hours: number; minutes: number } {
+    const trimmed = (timeStr || '').trim().toUpperCase();
+    const isPM = trimmed.includes('PM');
+    const isAM = trimmed.includes('AM');
+    const clean = trimmed.replace(/[^\d:]/g, '');
+    const parts = clean.split(':');
+    let hours = parseInt(parts[0], 10) || 0;
+    const minutes = parseInt(parts[1], 10) || 0;
+
+    if (isPM && hours < 12) hours += 12;
+    if (isAM && hours === 12) hours = 0;
+
+    return { hours, minutes };
+  }
+
+  /**
+   * Calculates continuous datetime range for a shift.
+   * If night shift or end time is earlier than start time, end datetime rolls over to the next day as ONE continuous shift.
+   */
+  public static calculateShiftDateTimeRange(
+    scheduledStartStr: string = '10:00 PM',
+    scheduledEndStr: string = '06:00 AM',
+    isNightShift: boolean = true,
+    baseDate: Date = new Date()
+  ): { startDateTime: Date; endDateTime: Date; startIso: string; endIso: string } {
+    const startHM = this.parseTimeStrToHoursMinutes(scheduledStartStr);
+    const endHM = this.parseTimeStrToHoursMinutes(scheduledEndStr);
+
+    const startDateTime = new Date(baseDate);
+    startDateTime.setHours(startHM.hours, startHM.minutes, 0, 0);
+
+    const endDateTime = new Date(baseDate);
+    endDateTime.setHours(endHM.hours, endHM.minutes, 0, 0);
+
+    // If night shift or end time is less than or equal to start time, add 1 full day (cross midnight)
+    if (isNightShift || endDateTime.getTime() <= startDateTime.getTime()) {
+      endDateTime.setDate(endDateTime.getDate() + 1);
+    }
+
+    return {
+      startDateTime,
+      endDateTime,
+      startIso: startDateTime.toISOString(),
+      endIso: endDateTime.toISOString(),
+    };
+  }
+
+  /**
+   * Computes human-readable duration (e.g. "8.0 hrs")
+   */
+  public static calculateShiftDuration(startInput: Date | string, endInput: Date | string): string {
+    const startDate = typeof startInput === 'string' ? new Date(startInput) : startInput;
+    const endDate = typeof endInput === 'string' ? new Date(endInput) : endInput;
+
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+      return '8.0 hrs';
+    }
+
+    const diffMs = Math.max(0, endDate.getTime() - startDate.getTime());
+    const totalMinutes = Math.round(diffMs / 60000);
+    const hours = (totalMinutes / 60).toFixed(1);
+    return `${hours} hrs`;
+  }
+
+  /**
+   * Checks if a scheduled shift has reached its expiration time
+   */
+  public static isShiftExpired(endInput: Date | string, currentInput: Date = new Date()): boolean {
+    const endDate = typeof endInput === 'string' ? new Date(endInput) : endInput;
+    if (isNaN(endDate.getTime())) return false;
+    return currentInput.getTime() >= endDate.getTime();
+  }
+
+  /**
    * Generates EXACTLY 5 RANDOM GPS VERIFICATION CHECKS during the student's configured shift window.
    * Handles night shifts crossing midnight correctly as one continuous interval.
    */
@@ -114,6 +190,116 @@ export class MockGpsService {
     }
 
     return checkTimes;
+  }
+
+  /**
+   * Generates EXACTLY 5 RANDOM SCHEDULED CHECKS for an active shift session.
+   * Ensures:
+   * 1. Strictly inside the shift window (start_datetime to end_datetime)
+   * 2. Exactly 5 unique check records (check_number: 1..5)
+   * 3. Reasonably distributed with minimum spacing
+   * 4. Night shifts spanning midnight handled continuously across dates
+   * 5. Initial status: SCHEDULED
+   */
+  public static generateFiveRandomScheduledChecks(
+    shiftSession: ShiftSession,
+    options?: { minSpacingMinutes?: number }
+  ): ScheduledRandomCheck[] {
+    const startDate = new Date(shiftSession.start_datetime || shiftSession.created_at || new Date());
+    const endDate = new Date(shiftSession.end_datetime || new Date(startDate.getTime() + 8 * 60 * 60 * 1000));
+
+    let durationMs = endDate.getTime() - startDate.getTime();
+    if (durationMs <= 0) {
+      durationMs = 8 * 60 * 60 * 1000;
+    }
+
+    const durationMinutes = durationMs / (60 * 1000);
+    const segmentMinutes = (durationMinutes * 0.88) / 5;
+    const minSpacingMinutes = options?.minSpacingMinutes || Math.max(12, Math.floor(segmentMinutes * 0.4));
+
+    const scheduledChecks: ScheduledRandomCheck[] = [];
+    const usedTimestamps: number[] = [];
+
+    for (let i = 1; i <= 5; i++) {
+      const segmentStartMin = durationMinutes * 0.06 + (i - 1) * segmentMinutes;
+      const randomOffset = segmentMinutes * (0.15 + Math.random() * 0.7);
+      let checkOffsetMin = Math.round(segmentStartMin + randomOffset);
+
+      if (checkOffsetMin < 5) checkOffsetMin = 5 + i * 2;
+      if (checkOffsetMin >= durationMinutes - 5) checkOffsetMin = durationMinutes - 10 + i;
+
+      let checkTimestamp = startDate.getTime() + checkOffsetMin * 60 * 1000;
+
+      if (usedTimestamps.length > 0) {
+        const lastTs = usedTimestamps[usedTimestamps.length - 1];
+        if (checkTimestamp - lastTs < minSpacingMinutes * 60 * 1000) {
+          checkTimestamp = lastTs + minSpacingMinutes * 60 * 1000;
+        }
+      }
+
+      if (checkTimestamp >= endDate.getTime()) {
+        checkTimestamp = endDate.getTime() - (6 - i) * 6 * 60 * 1000;
+      }
+
+      usedTimestamps.push(checkTimestamp);
+      const checkDate = new Date(checkTimestamp);
+      const timeStr = checkDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+
+      const checkRecord: ScheduledRandomCheck = {
+        id: `scheduled_check_${shiftSession.shift_session_id}_${i}`,
+        shift_session_id: shiftSession.shift_session_id,
+        register_number: shiftSession.register_number,
+        student_id: shiftSession.register_number,
+        student_name: shiftSession.student_name,
+        mentor_id: shiftSession.mentor_id,
+        mentor_name: shiftSession.mentor_name,
+        department: shiftSession.department,
+        check_number: i as 1 | 2 | 3 | 4 | 5,
+        scheduled_time: timeStr,
+        scheduled_datetime: checkDate.toISOString(),
+        status: 'SCHEDULED',
+        created_at: new Date().toISOString(),
+      };
+
+      scheduledChecks.push(checkRecord);
+    }
+
+    return scheduledChecks;
+  }
+
+  /**
+   * Executes a scheduled check: transitions SCHEDULED -> EXECUTING -> Result,
+   * binds GPS telemetry, geofence evaluation and returns the updated check & verification record.
+   */
+  public static executeScheduledCheck(
+    check: ScheduledRandomCheck,
+    student: Student,
+    forcedMode?: GpsSimulationMode,
+    geofenceConfig?: HospitalGeofence
+  ): { check: ScheduledRandomCheck; verification: GpsVerification } {
+    const geofence = geofenceConfig || this.activeGeofence || HOSPITAL_CONFIG;
+    const now = new Date();
+    const isoTimestamp = now.toISOString();
+    const timeDisplay = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+
+    // Transition to EXECUTING and obtain GPS verification
+    const verification = this.performGpsCheck(student, forcedMode, timeDisplay, 'RANDOM_CHECK');
+
+    const updatedCheck: ScheduledRandomCheck = {
+      ...check,
+      status: verification.status,
+      executed_at: isoTimestamp,
+      latitude: verification.latitude,
+      longitude: verification.longitude,
+      accuracy: verification.accuracy_meters,
+      distance_from_hospital: verification.distance_meters,
+      geofence_radius: geofence.radius_meters,
+      gps_state: forcedMode || this.currentSimulationMode,
+      permission_state: forcedMode === 'PERMISSION_DENIED' ? 'DENIED' : 'GRANTED',
+      result: verification.status,
+    };
+
+    return { check: updatedCheck, verification };
   }
 
   /**
@@ -210,13 +396,17 @@ export class MockGpsService {
       inside = false;
     }
 
+    const verificationId = `v_${student.register_number.toLowerCase()}_${Date.now()}`;
     const verification: GpsVerification = {
-      id: `v_${student.register_number}_${Date.now()}`,
+      id: verificationId,
+      verification_id: verificationId,
       register_number: student.register_number,
+      student_id: student.register_number,
       student_name: student.name,
       department: student.department,
       mentor_id: student.mentor_id,
       mentor_name: student.mentor_name,
+      shift_session_id: student.active_session_id,
       shift_name: student.shift_name,
       timestamp: isoTimestamp,
       time_display: timeDisplay,
@@ -225,6 +415,9 @@ export class MockGpsService {
       accuracy_meters: accuracy,
       latitude: Number(lat.toFixed(6)),
       longitude: Number(lng.toFixed(6)),
+      geofence_radius: geofence.radius_meters,
+      gps_state: mode,
+      permission_state: mode === 'PERMISSION_DENIED' ? 'DENIED' : 'GRANTED',
       is_inside_geofence: inside,
       verification_type: verificationType,
     };
