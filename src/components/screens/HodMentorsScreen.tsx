@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Header } from '../common/Header';
+import { getInitials } from '../../utils/avatarUtils';
 
 export const HodMentorsScreen: React.FC = () => {
   const {
@@ -123,7 +124,7 @@ export const HodMentorsScreen: React.FC = () => {
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="w-11 h-11 rounded-full bg-secondary/15 text-secondary flex items-center justify-center font-bold text-sm shrink-0 border border-secondary/30">
-                      {mentor.name.replace('Dr. ', '').substring(0, 2).toUpperCase()}
+                      {getInitials(mentor.name)}
                     </div>
                     <div className="min-w-0">
                       <h4 className="font-bold text-sm text-on-surface truncate">{mentor.name}</h4>
@@ -212,14 +213,9 @@ export const HodMentorsScreen: React.FC = () => {
                               className="p-2.5 bg-surface-container-lowest rounded-xl border border-outline-variant/40 flex items-center justify-between text-xs hover:border-primary/40 transition-colors cursor-pointer"
                             >
                               <div className="flex items-center gap-2.5 min-w-0">
-                                <img
-                                  src={
-                                    stud.avatar ||
-                                    'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'
-                                  }
-                                  alt={stud.name}
-                                  className="w-8 h-8 rounded-full object-cover border border-outline-variant shrink-0"
-                                />
+                                <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs border border-outline-variant shrink-0">
+                                  {getInitials(stud.name)}
+                                </div>
                                 <div className="min-w-0">
                                   <div className="font-bold text-on-surface truncate">{stud.name}</div>
                                   <div className="text-[10px] text-on-surface-variant font-mono">

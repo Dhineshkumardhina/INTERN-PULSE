@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Header } from '../common/Header';
+import { getInitials } from '../../utils/avatarUtils';
 
 export const MentorDashboard: React.FC = () => {
   const {
@@ -107,14 +108,9 @@ export const MentorDashboard: React.FC = () => {
           className="bg-surface-container-lowest rounded-2xl p-4 border border-outline-variant/60 shadow-2xs flex items-center justify-between"
         >
           <div className="flex items-center gap-3 min-w-0">
-            <img
-              src={
-                currentUser?.avatar ||
-                'https://images.unsplash.com/photo-1594824813580-b228b3a0e676?w=150&auto=format&fit=crop&q=80'
-              }
-              alt="Mentor Avatar"
-              className="w-12 h-12 rounded-full object-cover border-2 border-secondary shadow-2xs shrink-0"
-            />
+            <div className="w-12 h-12 rounded-full bg-secondary/15 text-secondary flex items-center justify-center font-bold text-base border-2 border-secondary shadow-2xs shrink-0">
+              {getInitials(currentUser?.name || 'Dr. Anitha')}
+            </div>
             <div className="min-w-0">
               <span className="text-[10px] uppercase font-bold text-secondary tracking-wider block">
                 Clinical Faculty Supervisor
@@ -404,14 +400,9 @@ export const MentorDashboard: React.FC = () => {
                     {/* Top row: Avatar, Name, Register No, Department & Status Badge */}
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex items-center gap-2.5 min-w-0">
-                        <img
-                          src={
-                            stud.avatar ||
-                            'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'
-                          }
-                          alt={stud.name}
-                          className="w-11 h-11 rounded-full object-cover border border-outline-variant shrink-0"
-                        />
+                        <div className="w-11 h-11 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm border border-outline-variant shrink-0">
+                          {getInitials(stud.name)}
+                        </div>
                         <div className="min-w-0">
                           <h4 className="font-bold text-sm text-on-surface truncate">
                             {stud.name}

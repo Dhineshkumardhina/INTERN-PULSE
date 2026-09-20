@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { UserRole } from '../../types';
+import { getInitials } from '../../utils/avatarUtils';
 
 interface HeaderProps {
   title?: string;
@@ -123,17 +124,9 @@ export const Header: React.FC<HeaderProps> = ({ title = 'InternTrack', showBack 
           <span className="text-[11px] font-bold text-primary max-w-[80px] truncate hidden sm:inline">
             {currentUser?.name?.split(' ')[0] || currentUser?.role}
           </span>
-          {currentUser?.avatar ? (
-            <img
-              src={currentUser.avatar}
-              alt={currentUser.name}
-              className="w-7 h-7 rounded-full object-cover border border-outline-variant"
-            />
-          ) : (
-            <div className="w-7 h-7 rounded-full bg-primary text-on-primary flex items-center justify-center font-bold text-[11px]">
-              {currentUser?.role?.substring(0, 2) || 'IT'}
-            </div>
-          )}
+          <div className="w-7 h-7 rounded-full bg-primary text-on-primary flex items-center justify-center font-bold text-[11px] shrink-0">
+            {getInitials(currentUser?.name, currentUser?.role?.substring(0, 2) || 'IT')}
+          </div>
           <span className="material-symbols-outlined text-[16px] text-outline">
             {showRoleMenu ? 'expand_less' : 'expand_more'}
           </span>

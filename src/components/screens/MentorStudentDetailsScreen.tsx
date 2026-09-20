@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Header } from '../common/Header';
+import { getInitials } from '../../utils/avatarUtils';
 
 export const MentorStudentDetailsScreen: React.FC = () => {
   const {
@@ -109,14 +110,9 @@ export const MentorStudentDetailsScreen: React.FC = () => {
         >
           <div className="flex items-start justify-between gap-2">
             <div className="flex items-center gap-3 min-w-0">
-              <img
-                src={
-                  student.avatar ||
-                  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'
-                }
-                alt={student.name}
-                className="w-14 h-14 rounded-full object-cover border-2 border-primary shadow-xs shrink-0"
-              />
+              <div className="w-14 h-14 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-lg border-2 border-primary shadow-xs shrink-0">
+                {getInitials(student.name)}
+              </div>
               <div className="min-w-0">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-secondary block">
                   Allied Health Intern

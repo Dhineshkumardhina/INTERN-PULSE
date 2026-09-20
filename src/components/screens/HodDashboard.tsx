@@ -1,6 +1,7 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
 import { Header } from '../common/Header';
+import { getInitials } from '../../utils/avatarUtils';
 
 export const HodDashboard: React.FC = () => {
   const {
@@ -46,14 +47,9 @@ export const HodDashboard: React.FC = () => {
           className="bg-surface-container-lowest rounded-2xl p-4 border border-outline-variant/60 shadow-2xs flex items-center justify-between"
         >
           <div className="flex items-center gap-3 min-w-0">
-            <img
-              src={
-                currentUser?.avatar ||
-                'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=150&auto=format&fit=crop&q=80'
-              }
-              alt="HOD Profile"
-              className="w-12 h-12 rounded-full object-cover border-2 border-primary shadow-xs shrink-0"
-            />
+            <div className="w-12 h-12 rounded-full bg-primary/15 text-primary flex items-center justify-center font-bold text-base border-2 border-primary shadow-xs shrink-0">
+              {getInitials(hodName)}
+            </div>
             <div className="min-w-0">
               <span className="text-[10px] uppercase font-bold tracking-wider text-primary block truncate">
                 Head of Department

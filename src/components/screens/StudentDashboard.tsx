@@ -1,6 +1,7 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
 import { Header } from '../common/Header';
+import { getInitials } from '../../utils/avatarUtils';
 
 export const StudentDashboard: React.FC = () => {
   const {
@@ -131,19 +132,9 @@ export const StudentDashboard: React.FC = () => {
             <button
               onClick={() => setCurrentScreen('student_profile')}
               title="View Internship Profile"
-              className="w-12 h-12 rounded-full overflow-hidden border-2 border-primary/20 shrink-0 cursor-pointer hover:border-primary transition-colors"
+              className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm border-2 border-primary/20 shrink-0 cursor-pointer hover:border-primary transition-colors"
             >
-              {student.avatar ? (
-                <img
-                  src={student.avatar}
-                  alt={student.name}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm">
-                  AK
-                </div>
-              )}
+              {getInitials(student.name)}
             </button>
           </div>
 

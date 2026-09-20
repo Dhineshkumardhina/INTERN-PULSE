@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Header } from '../common/Header';
+import { getInitials } from '../../utils/avatarUtils';
 
 export const HodStudentsScreen: React.FC = () => {
   const {
@@ -199,14 +200,9 @@ export const HodStudentsScreen: React.FC = () => {
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <img
-                        src={
-                          stud.avatar ||
-                          'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'
-                        }
-                        alt={stud.name}
-                        className="w-11 h-11 rounded-full object-cover border border-outline-variant shrink-0"
-                      />
+                      <div className="w-11 h-11 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm border border-outline-variant shrink-0">
+                        {getInitials(stud.name)}
+                      </div>
                       <div className="min-w-0">
                         <h4 className="font-bold text-sm text-on-surface truncate">{stud.name}</h4>
                         <div className="text-[11px] text-on-surface-variant font-mono">

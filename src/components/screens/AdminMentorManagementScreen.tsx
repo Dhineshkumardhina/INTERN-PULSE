@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Header } from '../common/Header';
+import { getInitials } from '../../utils/avatarUtils';
 import { Mentor } from '../../types';
 
 export const AdminMentorManagementScreen: React.FC = () => {
@@ -240,7 +241,7 @@ export const AdminMentorManagementScreen: React.FC = () => {
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <div className="flex items-center gap-2.5 min-w-0">
                     <div className="w-10 h-10 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center font-bold text-sm border border-secondary/20 shrink-0">
-                      <span className="material-symbols-outlined text-[22px]">badge</span>
+                      {getInitials(mentor.name)}
                     </div>
                     <div className="truncate">
                       <div className="flex items-center gap-1.5">
@@ -719,14 +720,9 @@ export const AdminMentorManagementScreen: React.FC = () => {
                     className="p-2.5 bg-surface-container-low rounded-xl border border-outline-variant/30 flex items-center justify-between"
                   >
                     <div className="flex items-center gap-2">
-                      <img
-                        src={
-                          stud.avatar ||
-                          'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'
-                        }
-                        alt={stud.name}
-                        className="w-8 h-8 rounded-full object-cover border border-outline-variant"
-                      />
+                      <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs border border-outline-variant shrink-0">
+                        {getInitials(stud.name)}
+                      </div>
                       <div>
                         <div className="font-bold text-on-surface">{stud.name}</div>
                         <div className="text-[10px] font-mono text-primary font-bold">

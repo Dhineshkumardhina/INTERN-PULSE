@@ -1203,7 +1203,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       is_night_shift: newStudentData.is_night_shift,
       is_active_shift: false,
       current_status: 'OFF SHIFT',
-      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+      avatar: undefined,
       schedules: [
         {
           id: `sch_${newStudentData.register_number.toLowerCase()}_1`,
@@ -2146,7 +2146,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       register_number: cleanReg,
       is_active_shift: false,
       current_status: 'OFF SHIFT',
-      avatar: newStudent.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+      avatar: undefined,
     };
 
     setStudents((prev) => [...prev, studentWithDefaults]);

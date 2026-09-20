@@ -598,20 +598,8 @@ export const INITIAL_MENTORS: Mentor[] = [
   },
 ];
 
-// Helper to generate avatar
-const getAvatar = (idx: number) => {
-  const avatars = [
-    'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150&auto=format&fit=crop&q=80',
-  ];
-  return avatars[idx % avatars.length];
-};
+// Helper to generate avatar (photos removed - initials used throughout)
+const getAvatar = (_idx: number): string | undefined => undefined;
 
 export const INITIAL_STUDENTS: Student[] = [
   // ==================== 1. B.Sc Critical Care Technology (12) ====================
@@ -2453,7 +2441,7 @@ export const DEMO_USERS: Record<string, UserProfile> = {
     role: 'STUDENT',
     department: 'Critical Care Technology',
     email: '23ucct001@smvmch.edu.in',
-    avatar: getAvatar(0),
+    avatar: undefined,
     password: 'Student@2026',
   },
   mentor01: {
@@ -2462,7 +2450,7 @@ export const DEMO_USERS: Record<string, UserProfile> = {
     role: 'MENTOR',
     department: 'Critical Care Technology',
     email: 'dr.priya@smvmch.edu.in',
-    avatar: 'https://images.unsplash.com/photo-1594824813589-3221e7d23d8c?w=150&auto=format&fit=crop&q=80',
+    avatar: undefined,
     password: 'Mentor@2026',
   },
   hod01: {
@@ -2471,7 +2459,7 @@ export const DEMO_USERS: Record<string, UserProfile> = {
     role: 'HOD',
     department: 'Critical Care Technology',
     email: 'hod.cct@smvmch.edu.in',
-    avatar: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=150&auto=format&fit=crop&q=80',
+    avatar: undefined,
     password: 'Hod@2026',
   },
   admin01: {
@@ -2480,7 +2468,7 @@ export const DEMO_USERS: Record<string, UserProfile> = {
     role: 'ADMIN',
     department: 'School of Allied Health Sciences',
     email: 'admin.ahs@smvmch.edu.in',
-    avatar: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=150&auto=format&fit=crop&q=80',
+    avatar: undefined,
     password: 'Admin@2026',
   },
 };

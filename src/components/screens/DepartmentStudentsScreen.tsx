@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Header } from '../common/Header';
+import { getInitials } from '../../utils/avatarUtils';
 
 export const DepartmentStudentsScreen: React.FC = () => {
   const { students, mentors, setCurrentScreen, setSelectedStudent } = useApp();
@@ -50,14 +51,9 @@ export const DepartmentStudentsScreen: React.FC = () => {
                 className="bg-surface-container-lowest rounded-xl p-3.5 border border-outline-variant/50 shadow-xs flex items-center justify-between"
               >
                 <div className="flex items-center gap-3">
-                  <img
-                    src={
-                      stud.avatar ||
-                      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'
-                    }
-                    alt={stud.name}
-                    className="w-11 h-11 rounded-full object-cover border border-outline-variant"
-                  />
+                  <div className="w-11 h-11 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm border border-outline-variant shrink-0">
+                    {getInitials(stud.name)}
+                  </div>
                   <div>
                     <div className="font-bold text-sm text-on-surface">{stud.name}</div>
                     <div className="text-xs text-on-surface-variant">

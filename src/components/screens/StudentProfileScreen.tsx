@@ -1,6 +1,7 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
 import { Header } from '../common/Header';
+import { getInitials } from '../../utils/avatarUtils';
 
 export const StudentProfileScreen: React.FC = () => {
   const { currentUser, students, setCurrentScreen, logout } = useApp();
@@ -15,18 +16,8 @@ export const StudentProfileScreen: React.FC = () => {
       <main className="p-3.5 space-y-3.5 flex-1">
         {/* Profile Card */}
         <div className="bg-surface-container-low rounded-2xl p-4 border border-outline-variant/40 shadow-2xs text-center relative overflow-hidden">
-          <div className="w-20 h-20 rounded-full bg-primary/10 mx-auto mb-2.5 overflow-hidden ring-4 ring-primary/15">
-            {student.avatar ? (
-              <img
-                src={student.avatar}
-                alt={student.name}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-primary font-bold text-xl">
-                {student.name.substring(0, 2).toUpperCase()}
-              </div>
-            )}
+          <div className="w-20 h-20 rounded-full bg-primary/10 mx-auto mb-2.5 overflow-hidden ring-4 ring-primary/15 flex items-center justify-center text-primary font-bold text-2xl shadow-inner">
+            {getInitials(student.name)}
           </div>
 
           <h2 className="text-base font-bold text-on-surface leading-tight">
