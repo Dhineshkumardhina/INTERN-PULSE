@@ -103,8 +103,8 @@ export const Header: React.FC<HeaderProps> = ({ title = 'InternTrack', showBack 
           </button>
         )}
 
-        {/* Clickable Geofence Perimeter Badge (Admin and HOD) */}
-        {(currentUser?.role === 'ADMIN' || currentUser?.role === 'HOD') && (
+        {/* Clickable Geofence Perimeter Badge (Admin, HOD, and Mentor) */}
+        {(currentUser?.role === 'ADMIN' || currentUser?.role === 'HOD' || currentUser?.role === 'MENTOR') && (
           <button
             id="header-geofence-badge"
             onClick={() => setCurrentScreen('geofence_setup')}
@@ -223,7 +223,7 @@ export const Header: React.FC<HeaderProps> = ({ title = 'InternTrack', showBack 
             )}
 
             <div className="border-t border-outline-variant/30 mt-1.5 pt-1 space-y-1">
-              {(currentUser?.role === 'ADMIN' || currentUser?.role === 'HOD') && (
+              {(currentUser?.role === 'ADMIN' || currentUser?.role === 'HOD' || currentUser?.role === 'MENTOR') && (
                 <button
                   id="header-menu-geofence"
                   onClick={() => {

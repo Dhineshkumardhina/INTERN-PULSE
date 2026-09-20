@@ -40,7 +40,6 @@ import { AdminReportsScreen } from './components/screens/AdminReportsScreen';
 import { AdminActivityLogScreen } from './components/screens/AdminActivityLogScreen';
 import { GeofenceSettingsScreen } from './components/screens/GeofenceSettingsScreen';
 import { BottomNav } from './components/common/BottomNav';
-import { SimulationBar } from './components/common/SimulationBar';
 
 // Role-Based Access Control (RBAC) Hierarchical Screen Sets
 const STUDENT_SCREENS = new Set([
@@ -62,6 +61,7 @@ const MENTOR_SCREENS = new Set([
   'mentor_active_shifts',
   'mentor_attendance',
   'mentor_notifications',
+  'geofence_setup',
 ]);
 
 const HOD_SCREENS = new Set([
@@ -73,6 +73,7 @@ const HOD_SCREENS = new Set([
   'hod_mentors',
   'hod_gps_monitoring',
   'hod_analytics_dashboard',
+  'geofence_setup',
 ]);
 
 const ADMIN_SCREENS = new Set([
@@ -221,7 +222,6 @@ const AppRouter: React.FC = () => {
         <VerificationRequestModal />
         <MentorAddStudentModal />
         <HodAddMentorModal />
-        <SimulationBar />
         <BottomNav />
       </div>
     </div>

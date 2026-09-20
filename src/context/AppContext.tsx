@@ -380,6 +380,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       'mentor_active_shifts',
       'mentor_attendance',
       'mentor_notifications',
+      'geofence_setup',
       ...STUDENT_ALLOWED,
     ]);
 
@@ -392,6 +393,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       'hod_mentors',
       'hod_gps_monitoring',
       'hod_analytics_dashboard',
+      'geofence_setup',
       ...MENTOR_ALLOWED,
     ]);
 
@@ -519,13 +521,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [hospitalGeofence]);
 
   const updateHospitalGeofence = (newConfig: Partial<HospitalGeofence>, reason = 'Institutional geofence recalibration') => {
-    if (currentUser?.role !== 'ADMIN' && currentUser?.role !== 'HOD') {
+    if (currentUser?.role !== 'ADMIN' && currentUser?.role !== 'HOD' && currentUser?.role !== 'MENTOR') {
       console.warn(`[Access Denied] User with role ${currentUser?.role} is not authorized to modify Hospital Geofence.`);
       return;
     }
 
     const updaterName = currentUser?.name 
-      ? `${currentUser.name}${currentUser.role === 'HOD' ? ` (HOD - ${currentUser.department || 'Dept'})` : ''}`
+      ? `${currentUser.name}${
+          currentUser.role === 'HOD'
+            ? ` (HOD - ${currentUser.department || 'Dept'})`
+            : currentUser.role === 'MENTOR'
+            ? ` (Mentor - ${currentUser.department || 'Dept'})`
+            : ''
+        }`
       : 'Hospital Administration';
 
     const updated: HospitalGeofence = {
@@ -562,13 +570,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const resetHospitalGeofence = () => {
-    if (currentUser?.role !== 'ADMIN' && currentUser?.role !== 'HOD') {
+    if (currentUser?.role !== 'ADMIN' && currentUser?.role !== 'HOD' && currentUser?.role !== 'MENTOR') {
       console.warn(`[Access Denied] User with role ${currentUser?.role} is not authorized to reset Hospital Geofence.`);
       return;
     }
 
     const updaterName = currentUser?.name 
-      ? `${currentUser.name}${currentUser.role === 'HOD' ? ` (HOD - ${currentUser.department || 'Dept'})` : ''}`
+      ? `${currentUser.name}${
+          currentUser.role === 'HOD'
+            ? ` (HOD - ${currentUser.department || 'Dept'})`
+            : currentUser.role === 'MENTOR'
+            ? ` (Mentor - ${currentUser.department || 'Dept'})`
+            : ''
+        }`
       : 'Hospital Administration';
 
     setHospitalGeofence(HOSPITAL_CONFIG);

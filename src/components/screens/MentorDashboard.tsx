@@ -14,6 +14,7 @@ export const MentorDashboard: React.FC = () => {
     setSelectedStudent,
     setSelectedAlert,
     openMentorAddStudentModal,
+    hospitalGeofence,
   } = useApp();
 
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
@@ -132,6 +133,43 @@ export const MentorDashboard: React.FC = () => {
             <span className="material-symbols-outlined text-[18px]">person_add</span>
             <span>Add Student</span>
           </button>
+        </section>
+
+        {/* Institutional Geofence Status Banner */}
+        <section
+          id="mentor-geofence-banner"
+          className="bg-surface-container-low border border-primary/25 rounded-2xl p-3.5 shadow-2xs"
+        >
+          <div className="flex items-center justify-between gap-3">
+            <div className="space-y-1 min-w-0">
+              <div className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
+                <span className="text-[10px] font-bold text-primary tracking-wider uppercase">
+                  Institutional Geofence Active ({hospitalGeofence.radius_meters}m Perimeter)
+                </span>
+              </div>
+              <h3 className="font-bold text-sm text-on-surface truncate">
+                {hospitalGeofence.name}
+              </h3>
+              <p className="text-[11px] text-on-surface-variant flex items-center gap-1.5 flex-wrap">
+                <span className="material-symbols-outlined text-[14px] text-primary">pin_drop</span>
+                <span>
+                  {hospitalGeofence.latitude.toFixed(4)}° N, {hospitalGeofence.longitude.toFixed(4)}° E
+                </span>
+                <span className="text-outline">|</span>
+                <span>Buffer: ±{hospitalGeofence.tolerance_meters || 15}m</span>
+              </p>
+            </div>
+
+            <button
+              id="btn-mentor-config-geofence"
+              onClick={() => setCurrentScreen('geofence_setup')}
+              className="px-3.5 py-2 bg-primary text-on-primary font-bold text-xs rounded-xl hover:bg-primary/90 transition-all flex items-center gap-1.5 cursor-pointer shadow-xs shrink-0"
+            >
+              <span className="material-symbols-outlined text-[16px]">tune</span>
+              <span>Geofence Settings</span>
+            </button>
+          </div>
         </section>
 
         {/* 5 Summary Cards */}

@@ -343,6 +343,7 @@ const MENTOR_SCREENS = [
   'mentor_attendance',
   'mentor_review',
   'mentor_review_arun_kumar',
+  'geofence_setup',
 ];
 
 const HOD_SCREENS = [
@@ -364,7 +365,6 @@ const ADMIN_SCREENS = [
   'admin_change_shift',
   'admin_alerts',
   'admin_activity_log',
-  'geofence_setup',
 ];
 
 const STUDENT_ALLOWED = new Set([...STUDENT_SCREENS]);
