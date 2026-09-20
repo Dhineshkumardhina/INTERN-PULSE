@@ -71,6 +71,14 @@ export class MockGpsService {
   }
 
   public static getActiveGeofence(): HospitalGeofence {
+    if (!this.activeGeofence || this.activeGeofence === HOSPITAL_CONFIG) {
+      try {
+        const saved = typeof localStorage !== 'undefined' ? localStorage.getItem('interntrack_hospital_geofence') : null;
+        if (saved) {
+          this.activeGeofence = JSON.parse(saved);
+        }
+      } catch {}
+    }
     return this.activeGeofence || HOSPITAL_CONFIG;
   }
 
@@ -277,13 +285,13 @@ export class MockGpsService {
     forcedMode?: GpsSimulationMode,
     geofenceConfig?: HospitalGeofence
   ): { check: ScheduledRandomCheck; verification: GpsVerification } {
-    const geofence = geofenceConfig || this.activeGeofence || HOSPITAL_CONFIG;
+    const geofence = geofenceConfig || this.getActiveGeofence();
     const now = new Date();
     const isoTimestamp = now.toISOString();
     const timeDisplay = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
 
     // Transition to EXECUTING and obtain GPS verification
-    const verification = this.performGpsCheck(student, forcedMode, timeDisplay, 'RANDOM_CHECK');
+    const verification = this.performGpsCheck(student, forcedMode, timeDisplay, 'RANDOM_CHECK', geofence);
 
     const updatedCheck: ScheduledRandomCheck = {
       ...check,
@@ -323,13 +331,14 @@ export class MockGpsService {
     student: Student,
     forcedMode?: GpsSimulationMode,
     customTime?: string,
-    verificationType: GpsVerification['verification_type'] = 'MANUAL'
+    verificationType: GpsVerification['verification_type'] = 'MANUAL',
+    geofenceConfig?: HospitalGeofence
   ): GpsVerification {
     const mode = forcedMode || this.currentSimulationMode;
     const now = new Date();
     const isoTimestamp = now.toISOString();
     const timeDisplay = customTime || this.getCurrentTimeString();
-    const geofence = this.activeGeofence || HOSPITAL_CONFIG;
+    const geofence = geofenceConfig || this.getActiveGeofence();
 
     let status: VerificationStatus = 'VERIFIED';
     let distance = 75;
@@ -345,7 +354,8 @@ export class MockGpsService {
     // D. GPS UNAVAILABLE: Status = GPS UNAVAILABLE
     // E. PERMISSION DENIED: Status = PERMISSION DENIED
     if (mode === 'INSIDE_HOSPITAL') {
-      const targetDist = 50; // meters inside perimeter
+      // Scale target distance dynamically so it is always safely within the active geofence perimeter
+      const targetDist = Math.max(10, Math.min(50, Math.round(geofence.radius_meters * 0.45)));
       accuracy = 6.0;
       
       const cosLat = Math.cos((geofence.latitude * Math.PI) / 180);
@@ -359,7 +369,7 @@ export class MockGpsService {
       inside = isInsideGeofence(lat, lng, geofence);
       status = inside && accuracy <= GPS_ACCURACY_THRESHOLD_METERS ? 'VERIFIED' : 'NEEDS ATTENTION';
     } else if (mode === 'OUTSIDE_HOSPITAL') {
-      const targetDist = 850; // meters outside perimeter
+      const targetDist = Math.max(850, geofence.radius_meters + 300);
       accuracy = 18.0;
       
       const cosLat = Math.cos((geofence.latitude * Math.PI) / 180);
@@ -373,7 +383,7 @@ export class MockGpsService {
       status = 'NEEDS ATTENTION';
     } else if (mode === 'LOW_ACCURACY') {
       status = 'LOW ACCURACY';
-      const targetDist = 42;
+      const targetDist = Math.max(10, Math.min(42, Math.round(geofence.radius_meters * 0.4)));
       accuracy = 65.0; // High inaccuracy exceeding 50m threshold
       const cosLat = Math.cos((geofence.latitude * Math.PI) / 180);
       lat = geofence.latitude + (targetDist * Math.SQRT1_2) / 111320;
@@ -434,9 +444,10 @@ export class MockGpsService {
     lng: number,
     accuracy: number,
     customTime?: string,
-    verificationType: GpsVerification['verification_type'] = 'MANUAL'
+    verificationType: GpsVerification['verification_type'] = 'MANUAL',
+    geofenceConfig?: HospitalGeofence
   ): GpsVerification {
-    const geofence = this.activeGeofence || HOSPITAL_CONFIG;
+    const geofence = geofenceConfig || this.getActiveGeofence();
     const now = new Date();
     const isoTimestamp = now.toISOString();
     const timeDisplay = customTime || this.getCurrentTimeString();

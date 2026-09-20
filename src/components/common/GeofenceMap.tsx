@@ -11,6 +11,8 @@ interface GeofenceMapProps {
   hospitalName?: string;
   onCoordinatesChange?: (lat: number, lng: number) => void;
   onRadiusChange?: (radius: number) => void;
+  onFixGeofence?: () => void;
+  hasUnsavedChanges?: boolean;
   interns?: Student[];
   testDistance?: number;
   className?: string;
@@ -54,6 +56,8 @@ export const GeofenceMap: React.FC<GeofenceMapProps> = ({
   hospitalName = 'Hospital Campus',
   onCoordinatesChange,
   onRadiusChange,
+  onFixGeofence,
+  hasUnsavedChanges = false,
   interns = [],
   testDistance = 45,
   className = 'h-[380px]',
@@ -225,6 +229,11 @@ export const GeofenceMap: React.FC<GeofenceMapProps> = ({
     }).addTo(map);
     centerMarkerRef.current = centerMarker;
 
+    // Stop click bubbling from markers to map container
+    centerMarker.on('click', (e: L.LeafletEvent) => {
+      L.DomEvent.stopPropagation(e);
+    });
+
     // Draggable Radius Handle on the perimeter edge
     const initialHandlePos = getRadiusHandlePosition(latitude, longitude, radiusMeters);
     const radiusHandle = L.marker(initialHandlePos, {
@@ -234,6 +243,10 @@ export const GeofenceMap: React.FC<GeofenceMapProps> = ({
       zIndexOffset: 500,
     }).addTo(map);
     radiusHandleMarkerRef.current = radiusHandle;
+
+    radiusHandle.on('click', (e: L.LeafletEvent) => {
+      L.DomEvent.stopPropagation(e);
+    });
 
     // Draggable Test Intern Marker
     const initialTestDist = testDistance || Math.round(radiusMeters * 0.45);
@@ -249,6 +262,10 @@ export const GeofenceMap: React.FC<GeofenceMapProps> = ({
       zIndexOffset: 700,
     }).addTo(map);
     testInternMarkerRef.current = testInternMarker;
+
+    testInternMarker.on('click', (e: L.LeafletEvent) => {
+      L.DomEvent.stopPropagation(e);
+    });
 
     // Connecting dashed measurement line from hospital center to test intern
     distanceLineRef.current = L.polyline([[latitude, longitude], initialTestPos], {
@@ -481,6 +498,11 @@ export const GeofenceMap: React.FC<GeofenceMapProps> = ({
       }
     }
 
+    // Smoothly pan camera to follow new coordinates if center is shifted (e.g. Presets, GPS)
+    if (mapInstanceRef.current.getCenter().distanceTo(latLng) > 15) {
+      mapInstanceRef.current.panTo(latLng, { animate: true, duration: 0.35 });
+    }
+
     mapInstanceRef.current.invalidateSize();
   }, [latitude, longitude, radiusMeters, toleranceMeters, getRadiusHandlePosition, createRadiusHandleIcon, createTestInternIcon]);
 
@@ -705,6 +727,28 @@ export const GeofenceMap: React.FC<GeofenceMapProps> = ({
             >
               <span className="material-symbols-outlined text-[18px]">add_location_alt</span>
               <span className="hidden sm:inline">Drop Pin</span>
+            </button>
+          )}
+
+          {/* Fix & Enforce Geofence Button */}
+          {onFixGeofence && (
+            <button
+              type="button"
+              id="btn-map-fix-geofence"
+              onClick={onFixGeofence}
+              title="Fix and enforce this geofence placement across the hospital"
+              className={`p-2 px-3 rounded-xl border shadow-md transition-all cursor-pointer shrink-0 flex items-center gap-1.5 text-xs font-bold ${
+                hasUnsavedChanges
+                  ? 'bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-700 animate-pulse shadow-emerald-500/30'
+                  : 'bg-white/95 backdrop-blur-md text-emerald-700 border-emerald-300 hover:bg-emerald-50'
+              }`}
+            >
+              <span className="material-symbols-outlined text-[18px]">
+                {hasUnsavedChanges ? 'lock' : 'check_circle'}
+              </span>
+              <span className="hidden sm:inline">
+                {hasUnsavedChanges ? 'Fix Geofence' : 'Fixed'}
+              </span>
             </button>
           )}
 

@@ -545,6 +545,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     setHospitalGeofence(updated);
     MockGpsService.setActiveGeofence(updated);
+    try {
+      localStorage.setItem('interntrack_hospital_geofence', JSON.stringify(updated));
+    } catch (e) {
+      console.warn('Failed to persist geofence to localStorage', e);
+    }
 
     // Update students hospital field if name changed
     if (newConfig.name && newConfig.name !== hospitalGeofence.name) {
@@ -779,7 +784,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } else {
       // Simulated processing delay for scanning clinical GPS
       await new Promise((resolve) => setTimeout(resolve, 500));
-      result = MockGpsService.performGpsCheck(targetStudent, forcedMode || gpsMode, customTime, verificationType);
+      result = MockGpsService.performGpsCheck(targetStudent, forcedMode || gpsMode, customTime, verificationType, hospitalGeofence);
     }
 
     // Update verifications log - prepend new record so full timeline is preserved!

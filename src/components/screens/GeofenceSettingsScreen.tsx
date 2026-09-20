@@ -92,7 +92,16 @@ export const GeofenceSettingsScreen: React.FC = () => {
     );
   };
 
-  // Handle Save
+  // Detect unsaved geofence adjustments
+  const hasUnsavedChanges =
+    Math.abs(latitude - hospitalGeofence.latitude) > 0.00001 ||
+    Math.abs(longitude - hospitalGeofence.longitude) > 0.00001 ||
+    radiusMeters !== hospitalGeofence.radius_meters ||
+    toleranceMeters !== (hospitalGeofence.tolerance_meters || 15) ||
+    name !== hospitalGeofence.name ||
+    departmentZone !== (hospitalGeofence.department_zone || 'Central Clinical Campus');
+
+  // Handle Save & Fix
   const handleSaveGeofence = () => {
     updateHospitalGeofence(
       {
@@ -103,14 +112,37 @@ export const GeofenceSettingsScreen: React.FC = () => {
         radius_meters: radiusMeters,
         tolerance_meters: toleranceMeters,
       },
-      reason
+      reason || 'Calibrated and fixed hospital geofence perimeter'
     );
 
-    setToastMessage(`Geofence updated to ${radiusMeters}m! Enforced across all active shifts.`);
+    setToastMessage(`Geofence fixed & set to ${radiusMeters}m! Enforced across all active shifts.`);
     setShowSuccessToast(true);
     setTimeout(() => {
       setShowSuccessToast(false);
     }, 4500);
+  };
+
+  // Handle Back with auto-save if placed/modified
+  const handleBack = () => {
+    if (hasUnsavedChanges) {
+      // Auto-fix before leaving so the user's placed geofence coordinates are never discarded!
+      updateHospitalGeofence(
+        {
+          name,
+          department_zone: departmentZone,
+          latitude,
+          longitude,
+          radius_meters: radiusMeters,
+          tolerance_meters: toleranceMeters,
+        },
+        reason || 'Auto-saved geofence placement'
+      );
+    }
+    const role = currentUser?.role || currentRole;
+    if (role === 'ADMIN') setCurrentScreen('admin_dashboard');
+    else if (role === 'HOD') setCurrentScreen('hod_dashboard');
+    else if (role === 'MENTOR') setCurrentScreen('mentor_dashboard');
+    else setCurrentScreen('student_dashboard');
   };
 
   // Handle Reset
@@ -147,7 +179,7 @@ export const GeofenceSettingsScreen: React.FC = () => {
         >
           <span className="material-symbols-outlined text-[24px]">verified</span>
           <div className="flex-1 text-xs">
-            <p className="font-bold text-sm">Geofence Enforced</p>
+            <p className="font-bold text-sm">Geofence Enforced & Fixed</p>
             <p className="opacity-95">{toastMessage}</p>
           </div>
           <button
@@ -162,31 +194,41 @@ export const GeofenceSettingsScreen: React.FC = () => {
       {/* Screen Header */}
       <header className="bg-surface border-b border-outline-variant/40 px-4 pt-4 pb-3 sticky top-0 z-30 shadow-xs">
         <div className="flex items-center justify-between">
-          <button
-            id="btn-geofence-back"
-            onClick={() => {
-              const role = currentUser?.role || currentRole;
-              if (role === 'ADMIN') setCurrentScreen('admin_dashboard');
-              else if (role === 'HOD') setCurrentScreen('hod_dashboard');
-              else if (role === 'MENTOR') setCurrentScreen('mentor_dashboard');
-              else setCurrentScreen('student_dashboard');
-            }}
-            className="flex items-center gap-1 text-xs font-semibold text-primary bg-primary/10 px-2.5 py-1.5 rounded-lg cursor-pointer hover:bg-primary/20 transition-all"
-          >
-            <span className="material-symbols-outlined text-[18px]">arrow_back</span>
-            <span>Back</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              id="btn-geofence-back"
+              onClick={handleBack}
+              className="flex items-center gap-1 text-xs font-semibold text-primary bg-primary/10 px-2.5 py-1.5 rounded-lg cursor-pointer hover:bg-primary/20 transition-all"
+            >
+              <span className="material-symbols-outlined text-[18px]">arrow_back</span>
+              <span>Back</span>
+            </button>
+
+            {hasUnsavedChanges && (
+              <button
+                id="btn-header-fix-geofence"
+                onClick={handleSaveGeofence}
+                className="flex items-center gap-1 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 px-3 py-1.5 rounded-lg shadow-sm cursor-pointer transition-all active:scale-95 animate-pulse"
+                title="Fix and enforce placed geofence"
+              >
+                <span className="material-symbols-outlined text-[16px]">lock</span>
+                <span>Save & Fix</span>
+              </button>
+            )}
+          </div>
 
           <div className="text-center">
             <h1 className="text-sm font-bold text-on-surface flex items-center justify-center gap-1.5">
               <span className="material-symbols-outlined text-primary text-[20px]">share_location</span>
               Hospital Geofence
             </h1>
-            <p className="text-[10px] text-on-surface-variant">Perimeter Configuration & Calibration</p>
+            <p className="text-[10px] text-on-surface-variant">
+              {hasUnsavedChanges ? '⚠️ Placement pending fix' : 'Perimeter Configuration & Calibration'}
+            </p>
           </div>
 
           <div className="flex items-center gap-1 bg-surface-container-high px-2 py-1 rounded-full border border-outline-variant/60">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span className={`w-2 h-2 rounded-full ${hasUnsavedChanges ? 'bg-amber-500' : 'bg-emerald-500'} animate-pulse`}></span>
             <span className="text-[10px] font-bold text-on-surface">{radiusMeters}m</span>
           </div>
         </div>
@@ -290,11 +332,51 @@ export const GeofenceSettingsScreen: React.FC = () => {
                 onRadiusChange={(newRadius) => {
                   setRadiusMeters(newRadius);
                 }}
+                onFixGeofence={handleSaveGeofence}
+                hasUnsavedChanges={hasUnsavedChanges}
                 interns={students}
                 testDistance={testDistance}
                 className="h-[380px]"
                 interactive={true}
               />
+
+              {/* Instant Fix Action Banner directly below Map */}
+              {hasUnsavedChanges ? (
+                <div className="bg-amber-500/10 border-2 border-amber-500/40 rounded-xl p-3 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-sm">
+                  <div className="flex items-center gap-2.5">
+                    <span className="material-symbols-outlined text-amber-600 text-[24px] animate-pulse shrink-0">
+                      pin_drop
+                    </span>
+                    <div>
+                      <p className="text-xs font-bold text-amber-900 dark:text-amber-200">
+                        Geofence Position / Radius Adjusted
+                      </p>
+                      <p className="text-[11px] text-amber-800/90 dark:text-amber-300/90">
+                        Center: {latitude.toFixed(4)}°N, {longitude.toFixed(4)}°E (Radius: {radiusMeters}m). Tap to fix & apply across all shifts.
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    id="btn-fix-geofence-quick"
+                    type="button"
+                    onClick={handleSaveGeofence}
+                    className="w-full sm:w-auto px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-md hover:shadow-lg active:scale-95 transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">lock</span>
+                    <span>Fix & Enforce Geofence ({radiusMeters}m)</span>
+                  </button>
+                </div>
+              ) : (
+                <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-2.5 flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 text-emerald-800 dark:text-emerald-300 text-xs font-semibold">
+                    <span className="material-symbols-outlined text-emerald-600 text-[18px]">verified</span>
+                    <span>Geofence Fixed & Active ({hospitalGeofence.radius_meters}m)</span>
+                  </div>
+                  <span className="text-[10px] text-emerald-700 dark:text-emerald-400 font-mono">
+                    {hospitalGeofence.latitude.toFixed(4)}°N, {hospitalGeofence.longitude.toFixed(4)}°E
+                  </span>
+                </div>
+              )}
 
               {/* Free Map Action Guidance Box */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[10px] bg-surface-container-low p-2.5 rounded-xl border border-outline-variant/60">
