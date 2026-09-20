@@ -19,31 +19,34 @@ interface GeofenceMapProps {
   interactive?: boolean;
 }
 
-type MapTileStyle = 'streets' | 'humanitarian' | 'clinical' | 'satellite';
+type MapTileStyle = 'streets' | 'satellite' | 'clinical' | 'humanitarian';
 
-const TILE_LAYERS: Record<MapTileStyle, { name: string; url: string; attribution: string; maxZoom: number }> = {
+const TILE_LAYERS: Record<MapTileStyle, { name: string; url: string; subdomains?: string; attribution: string; maxZoom: number }> = {
   streets: {
-    name: 'OpenStreetMap (Free)',
-    url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors (Free & Open)',
+    name: 'OpenStreetMap Streets',
+    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    subdomains: 'abc',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors',
     maxZoom: 19,
   },
-  humanitarian: {
-    name: 'OSM Humanitarian (Free)',
-    url: 'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, Tiles courtesy of <a href="https://www.hotosm.org/">Humanitarian OSM</a>',
+  satellite: {
+    name: 'Satellite Aerial',
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    attribution: 'Tiles &copy; Esri World Imagery',
     maxZoom: 19,
   },
   clinical: {
-    name: 'Clinical Carto (Free)',
+    name: 'Carto Voyager (Fast Edge CDN)',
     url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+    subdomains: 'abcd',
     attribution: '&copy; <a href="https://carto.com/">CARTO</a> &copy; OpenStreetMap',
     maxZoom: 20,
   },
-  satellite: {
-    name: 'Satellite Aerial (Free)',
-    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-    attribution: 'Tiles &copy; Esri World Imagery (Public Prototyping)',
+  humanitarian: {
+    name: 'OSM Humanitarian',
+    url: 'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
+    subdomains: 'abc',
+    attribution: '&copy; Humanitarian OSM',
     maxZoom: 19,
   },
 };
@@ -60,7 +63,7 @@ export const GeofenceMap: React.FC<GeofenceMapProps> = ({
   hasUnsavedChanges = false,
   interns = [],
   testDistance = 45,
-  className = 'h-[380px]',
+  className = 'h-[480px]',
   interactive = true,
 }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -74,15 +77,16 @@ export const GeofenceMap: React.FC<GeofenceMapProps> = ({
   const toleranceCircleRef = useRef<L.Circle | null>(null);
   const internMarkersLayerRef = useRef<L.LayerGroup | null>(null);
 
-  // Default tile style: 100% Free OpenStreetMap
+  // Default tile style: OpenStreetMap Streets (crisp road names, high contrast, campus landmarks)
   const [activeTile, setActiveTile] = useState<MapTileStyle>('streets');
+  const [showInterns, setShowInterns] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isSearching, setIsSearching] = useState<boolean>(false);
   const [searchResults, setSearchResults] = useState<Array<{ display_name: string; lat: string; lon: string }>>([]);
   const [showSearchResults, setShowSearchResults] = useState<boolean>(false);
   const [isLocating, setIsLocating] = useState<boolean>(false);
   const [mapNotice, setMapNotice] = useState<string | null>(
-    'Free OpenStreetMap: Click map or drag blue pin to place hospital geofence center.'
+    'Free Campus Map Active: Click map or drag blue pin to place hospital geofence center.'
   );
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [isPlacingPinMode, setIsPlacingPinMode] = useState<boolean>(false);
@@ -179,22 +183,66 @@ export const GeofenceMap: React.FC<GeofenceMapProps> = ({
 
   // Initialize Map
   useEffect(() => {
-    if (!mapContainerRef.current || mapInstanceRef.current) return;
+    if (!mapContainerRef.current) return;
 
-    const map = L.map(mapContainerRef.current, {
-      center: [latitude, longitude],
-      zoom: 17,
-      minZoom: 3,
-      maxZoom: 19,
-      zoomControl: false,
-    });
+    // Safety: ensure container doesn't retain a stale Leaflet ID across remounts (React Strict Mode fix)
+    if ((mapContainerRef.current as any)._leaflet_id) {
+      try {
+        delete (mapContainerRef.current as any)._leaflet_id;
+      } catch {
+        (mapContainerRef.current as any)._leaflet_id = undefined;
+      }
+    }
 
-    // Add initial Free OpenStreetMap tile layer
-    const initialTile = TILE_LAYERS[activeTile];
-    tileLayerRef.current = L.tileLayer(initialTile.url, {
+    if (mapInstanceRef.current) {
+      try {
+        mapInstanceRef.current.remove();
+      } catch {}
+      mapInstanceRef.current = null;
+    }
+
+    let map: L.Map;
+    try {
+      map = L.map(mapContainerRef.current, {
+        center: [latitude, longitude],
+        zoom: 17,
+        minZoom: 3,
+        maxZoom: 20,
+        zoomControl: false,
+      });
+    } catch (err) {
+      console.warn('Map re-init fallback:', err);
+      if (mapContainerRef.current) {
+        delete (mapContainerRef.current as any)._leaflet_id;
+        map = L.map(mapContainerRef.current, {
+          center: [latitude, longitude],
+          zoom: 17,
+          minZoom: 3,
+          maxZoom: 20,
+          zoomControl: false,
+        });
+      } else {
+        return;
+      }
+    }
+
+    // Add initial Free Carto/OSM tile layer with multi-domain edge CDN
+    const initialTile = TILE_LAYERS[activeTile] || TILE_LAYERS.streets;
+    const tileLayer = L.tileLayer(initialTile.url, {
       attribution: initialTile.attribution,
       maxZoom: initialTile.maxZoom,
+      subdomains: initialTile.subdomains || 'abc',
+      crossOrigin: true,
     }).addTo(map);
+    tileLayerRef.current = tileLayer;
+
+    // Fallback: if current tile server fails, fallback gracefully
+    tileLayer.on('tileerror', () => {
+      console.warn('Tile fetch issue on current provider, falling back to Carto Voyager.');
+      if (activeTile !== 'clinical') {
+        setActiveTile('clinical');
+      }
+    });
 
     // Zoom control at bottom right
     L.control.zoom({ position: 'bottomright' }).addTo(map);
@@ -430,15 +478,34 @@ export const GeofenceMap: React.FC<GeofenceMapProps> = ({
       resizeObserver.observe(mapContainerRef.current);
     }
 
-    // Initial redraw
-    setTimeout(() => {
+    // Multiple invalidateSize passes to guarantee full tile rasterization across all browsers
+    map.invalidateSize();
+    const t1 = setTimeout(() => map.invalidateSize(), 80);
+    const t2 = setTimeout(() => map.invalidateSize(), 250);
+    const t3 = setTimeout(() => map.invalidateSize(), 600);
+
+    const handleWinResize = () => {
       map.invalidateSize();
-    }, 150);
+    };
+    window.addEventListener('resize', handleWinResize);
 
     return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+      window.removeEventListener('resize', handleWinResize);
       resizeObserver.disconnect();
-      map.remove();
+      try {
+        map.remove();
+      } catch {}
       mapInstanceRef.current = null;
+      if (mapContainerRef.current) {
+        try {
+          delete (mapContainerRef.current as any)._leaflet_id;
+        } catch {
+          (mapContainerRef.current as any)._leaflet_id = undefined;
+        }
+      }
     };
   }, []);
 
@@ -448,11 +515,23 @@ export const GeofenceMap: React.FC<GeofenceMapProps> = ({
     if (tileLayerRef.current) {
       mapInstanceRef.current.removeLayer(tileLayerRef.current);
     }
-    const tileConfig = TILE_LAYERS[activeTile];
-    tileLayerRef.current = L.tileLayer(tileConfig.url, {
+    const tileConfig = TILE_LAYERS[activeTile] || TILE_LAYERS.streets;
+    const tileLayer = L.tileLayer(tileConfig.url, {
       attribution: tileConfig.attribution,
       maxZoom: tileConfig.maxZoom,
+      subdomains: tileConfig.subdomains || 'abc',
+      crossOrigin: true,
     }).addTo(mapInstanceRef.current);
+    tileLayerRef.current = tileLayer;
+
+    tileLayer.on('tileerror', () => {
+      console.warn('Current tile provider failed, falling back to Carto Voyager.');
+      if (activeTile !== 'clinical') {
+        setActiveTile('clinical');
+      }
+    });
+
+    mapInstanceRef.current.invalidateSize();
   }, [activeTile]);
 
   // Update Center Marker Position & Circles when props change
@@ -513,11 +592,13 @@ export const GeofenceMap: React.FC<GeofenceMapProps> = ({
     }
   }, [hospitalName, createCenterPinIcon]);
 
-  // Render Intern Markers on the map
+  // Render Intern Markers on the map (only when showInterns is enabled)
   useEffect(() => {
     if (!mapInstanceRef.current || !internMarkersLayerRef.current) return;
 
     internMarkersLayerRef.current.clearLayers();
+
+    if (!showInterns) return;
 
     interns.forEach((intern) => {
       const isBreach = intern.current_status === 'NEEDS ATTENTION' || intern.current_status === 'FAILED';
@@ -571,7 +652,7 @@ export const GeofenceMap: React.FC<GeofenceMapProps> = ({
         </div>
       `);
     });
-  }, [interns, latitude, longitude, radiusMeters]);
+  }, [interns, latitude, longitude, radiusMeters, showInterns]);
 
   // Free Nominatim OpenStreetMap Search
   const handleSearch = async (e: React.FormEvent) => {
@@ -663,31 +744,75 @@ export const GeofenceMap: React.FC<GeofenceMapProps> = ({
       className={`relative w-full rounded-2xl overflow-hidden border border-outline-variant/60 shadow-sm flex flex-col bg-surface ${className} ${
         isFullscreen ? 'fixed inset-0 z-50 rounded-none border-none h-screen' : ''
       }`}
+      style={{
+        width: '100%',
+        minHeight: isFullscreen ? '100vh' : '440px',
+        height: isFullscreen ? '100vh' : '480px',
+      }}
     >
-      {/* Free Map Header Info Pill */}
-      <div className="bg-primary/95 text-white px-3 py-1.5 flex items-center justify-between text-[11px] font-medium z-10 shrink-0">
-        <div className="flex items-center gap-1.5">
-          <span className="material-symbols-outlined text-[15px] text-emerald-300">public</span>
-          <span className="font-bold">Free OpenStreetMap Geofence</span>
-          <span className="hidden sm:inline text-white/80 font-normal">• 100% Free & Open (No API Key Required)</span>
+      {/* Top Map Header Info Bar */}
+      <div className="bg-primary/95 text-white px-3 py-2 flex items-center justify-between text-[11px] font-medium z-10 shrink-0 shadow-xs">
+        <div className="flex items-center gap-2">
+          <span className="material-symbols-outlined text-[16px] text-emerald-300">public</span>
+          <span className="font-bold">Campus Geofence Map</span>
+          <span className="hidden sm:inline text-white/70 text-[10px]">• Click map or drag pins</span>
         </div>
-        <div className="flex items-center gap-1 text-[10px] bg-white/15 px-2 py-0.5 rounded-full">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span>Live GPS Active</span>
+
+        <div className="flex items-center gap-2">
+          {/* Interns Marker Toggle */}
+          {interns.length > 0 && (
+            <button
+              type="button"
+              id="btn-map-toggle-interns"
+              onClick={() => setShowInterns(!showInterns)}
+              className={`px-2 py-0.5 rounded-md text-[10px] font-semibold flex items-center gap-1 transition-all cursor-pointer ${
+                showInterns
+                  ? 'bg-emerald-500 text-white shadow-xs'
+                  : 'bg-white/15 text-white/90 hover:bg-white/25'
+              }`}
+              title={showInterns ? 'Hide intern pins to clear map' : 'Show intern positions'}
+            >
+              <span className="material-symbols-outlined text-[13px]">group</span>
+              <span>{showInterns ? 'Hide Interns' : `Interns (${interns.length})`}</span>
+            </button>
+          )}
+
+          {/* Quick Perimeter adjust pills */}
+          {onRadiusChange && (
+            <div className="flex items-center gap-1 bg-white/15 px-2 py-0.5 rounded-md font-mono font-bold text-[10px]">
+              <span>R: {radiusMeters}m</span>
+              <button
+                type="button"
+                onClick={() => onRadiusChange(Math.max(25, radiusMeters - 25))}
+                className="w-4 h-4 rounded bg-white/20 hover:bg-white/40 flex items-center justify-center cursor-pointer text-xs leading-none"
+                title="Decrease radius 25m"
+              >
+                −
+              </button>
+              <button
+                type="button"
+                onClick={() => onRadiusChange(Math.min(800, radiusMeters + 25))}
+                className="w-4 h-4 rounded bg-white/20 hover:bg-white/40 flex items-center justify-center cursor-pointer text-xs leading-none"
+                title="Increase radius 25m"
+              >
+                +
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Search & Action Bar */}
-      <div className="absolute top-10 left-2 right-2 z-[400] flex flex-col gap-1.5 pointer-events-none">
+      {/* Floating Search & Action Bar */}
+      <div className="absolute top-11 left-2 right-2 z-[400] flex flex-col gap-1.5 pointer-events-none">
         <div className="flex items-center gap-1.5 pointer-events-auto">
           {/* Free Nominatim Search Form */}
-          <form onSubmit={handleSearch} className="flex-1 relative flex items-center shadow-md">
+          <form onSubmit={handleSearch} className="flex-1 relative flex items-center shadow-md min-w-0">
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search hospital, city or street (OpenStreetMap)..."
-              className="w-full bg-white/95 backdrop-blur-md text-on-surface text-xs font-medium pl-8 pr-8 py-2 rounded-xl border border-outline-variant/60 shadow-inner focus:outline-primary placeholder:text-on-surface-variant/70"
+              placeholder="Search hospital, city or road..."
+              className="w-full bg-white/95 backdrop-blur-md text-on-surface text-xs font-medium pl-8 pr-7 py-2 rounded-xl border border-outline-variant/60 shadow-inner focus:outline-primary placeholder:text-on-surface-variant/70 min-w-0"
             />
             <span className="material-symbols-outlined absolute left-2.5 text-[16px] text-on-surface-variant pointer-events-none">
               search
@@ -701,7 +826,7 @@ export const GeofenceMap: React.FC<GeofenceMapProps> = ({
                 }}
                 className="absolute right-2 text-on-surface-variant hover:text-on-surface cursor-pointer"
               >
-                <span className="material-symbols-outlined text-[16px]">close</span>
+                <span className="material-symbols-outlined text-[15px]">close</span>
               </button>
             )}
           </form>
@@ -710,6 +835,7 @@ export const GeofenceMap: React.FC<GeofenceMapProps> = ({
           {interactive && (
             <button
               type="button"
+              id="btn-map-drop-pin"
               onClick={() => {
                 setIsPlacingPinMode(!isPlacingPinMode);
                 setMapNotice(
@@ -725,42 +851,35 @@ export const GeofenceMap: React.FC<GeofenceMapProps> = ({
                   : 'bg-white/95 backdrop-blur-md text-on-surface border-outline-variant/60 hover:bg-primary hover:text-white'
               }`}
             >
-              <span className="material-symbols-outlined text-[18px]">add_location_alt</span>
+              <span className="material-symbols-outlined text-[17px]">add_location_alt</span>
               <span className="hidden sm:inline">Drop Pin</span>
             </button>
           )}
 
-          {/* Fix & Enforce Geofence Button */}
-          {onFixGeofence && (
+          {/* Fix & Enforce Geofence Button (highlighted when changed) */}
+          {onFixGeofence && hasUnsavedChanges && (
             <button
               type="button"
               id="btn-map-fix-geofence"
               onClick={onFixGeofence}
               title="Fix and enforce this geofence placement across the hospital"
-              className={`p-2 px-3 rounded-xl border shadow-md transition-all cursor-pointer shrink-0 flex items-center gap-1.5 text-xs font-bold ${
-                hasUnsavedChanges
-                  ? 'bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-700 animate-pulse shadow-emerald-500/30'
-                  : 'bg-white/95 backdrop-blur-md text-emerald-700 border-emerald-300 hover:bg-emerald-50'
-              }`}
+              className="p-2 px-2.5 rounded-xl border shadow-md transition-all cursor-pointer shrink-0 flex items-center gap-1 text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-700 animate-pulse shadow-emerald-500/30"
             >
-              <span className="material-symbols-outlined text-[18px]">
-                {hasUnsavedChanges ? 'lock' : 'check_circle'}
-              </span>
-              <span className="hidden sm:inline">
-                {hasUnsavedChanges ? 'Fix Geofence' : 'Fixed'}
-              </span>
+              <span className="material-symbols-outlined text-[17px]">lock</span>
+              <span className="hidden sm:inline">Fix</span>
             </button>
           )}
 
           {/* Device GPS Button */}
           <button
             type="button"
+            id="btn-map-locate-me"
             onClick={handleLocateMe}
             disabled={isLocating}
             title="Calibrate geofence to your current physical GPS location"
             className="p-2 bg-white/95 backdrop-blur-md rounded-xl border border-outline-variant/60 shadow-md text-primary hover:bg-primary hover:text-white transition-all cursor-pointer disabled:opacity-50 shrink-0"
           >
-            <span className={`material-symbols-outlined text-[18px] ${isLocating ? 'animate-spin' : ''}`}>
+            <span className={`material-symbols-outlined text-[17px] ${isLocating ? 'animate-spin' : ''}`}>
               {isLocating ? 'sync' : 'my_location'}
             </span>
           </button>
@@ -768,6 +887,7 @@ export const GeofenceMap: React.FC<GeofenceMapProps> = ({
           {/* Fullscreen toggle */}
           <button
             type="button"
+            id="btn-map-fullscreen"
             onClick={() => {
               setIsFullscreen(!isFullscreen);
               setTimeout(() => {
@@ -777,7 +897,7 @@ export const GeofenceMap: React.FC<GeofenceMapProps> = ({
             title={isFullscreen ? 'Exit Fullscreen' : 'Expand Fullscreen Map'}
             className="p-2 bg-white/95 backdrop-blur-md rounded-xl border border-outline-variant/60 shadow-md text-on-surface-variant hover:text-on-surface transition-all cursor-pointer shrink-0"
           >
-            <span className="material-symbols-outlined text-[18px]">
+            <span className="material-symbols-outlined text-[17px]">
               {isFullscreen ? 'fullscreen_exit' : 'fullscreen'}
             </span>
           </button>
@@ -807,7 +927,7 @@ export const GeofenceMap: React.FC<GeofenceMapProps> = ({
 
       {/* Drop Pin Mode Active Floating Instruction Pill */}
       {isPlacingPinMode && (
-        <div className="absolute top-16 left-1/2 -translate-x-1/2 z-[450] bg-amber-500 text-white font-bold text-xs px-3.5 py-1.5 rounded-full shadow-2xl flex items-center gap-2 border-2 border-white pointer-events-auto animate-bounce select-none">
+        <div className="absolute top-24 left-1/2 -translate-x-1/2 z-[450] bg-amber-500 text-white font-bold text-xs px-3.5 py-1.5 rounded-full shadow-2xl flex items-center gap-2 border-2 border-white pointer-events-auto animate-bounce select-none">
           <span className="material-symbols-outlined text-[16px]">touch_app</span>
           <span>Click anywhere on the map to drop hospital pin</span>
           <button
@@ -829,95 +949,74 @@ export const GeofenceMap: React.FC<GeofenceMapProps> = ({
       <div
         ref={mapContainerRef}
         id="free-geofence-map-container"
-        className={`w-full flex-1 z-0 relative min-h-[300px] ${
+        className={`w-full flex-1 z-0 relative ${
           isPlacingPinMode ? 'cursor-crosshair' : 'cursor-default'
         }`}
-        style={{ minHeight: '300px' }}
+        style={{
+          width: '100%',
+          height: '100%',
+          minHeight: '400px',
+          backgroundColor: '#f2efe9',
+        }}
       />
-
-      {/* Radius Quick Presets Overlay (Top-Right) */}
-      {onRadiusChange && (
-        <div className="absolute top-22 right-2 z-[400] flex flex-col items-end gap-1 pointer-events-auto">
-          <div className="bg-white/95 backdrop-blur-md rounded-xl p-2 shadow-md border border-outline-variant/60 flex flex-col items-center gap-1.5">
-            <span className="text-[9px] font-bold text-on-surface-variant uppercase tracking-wider">
-              Radius Presets
-            </span>
-            <div className="grid grid-cols-2 gap-1 text-[10px] font-bold">
-              {[50, 100, 150, 250, 400].map((preset) => (
-                <button
-                  key={preset}
-                  type="button"
-                  onClick={() => handleRadiusPreset(preset)}
-                  className={`px-1.5 py-1 rounded-md transition-colors cursor-pointer ${
-                    radiusMeters === preset
-                      ? 'bg-primary text-white shadow-2xs'
-                      : 'bg-surface-container hover:bg-primary/20 text-on-surface'
-                  }`}
-                >
-                  {preset}m
-                </button>
-              ))}
-            </div>
-
-            <div className="w-full border-t border-outline-variant/40 pt-1 flex items-center justify-between text-xs font-mono font-bold text-primary">
-              <span>{radiusMeters}m</span>
-              <div className="flex items-center gap-0.5">
-                <button
-                  type="button"
-                  onClick={() => onRadiusChange(Math.max(25, radiusMeters - 25))}
-                  className="w-5 h-5 bg-surface-container hover:bg-primary hover:text-white rounded flex items-center justify-center font-bold cursor-pointer"
-                  title="Shrink -25m"
-                >
-                  −
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onRadiusChange(Math.min(800, radiusMeters + 25))}
-                  className="w-5 h-5 bg-surface-container hover:bg-primary hover:text-white rounded flex items-center justify-center font-bold cursor-pointer"
-                  title="Expand +25m"
-                >
-                  +
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Map Tile Style Selector (Bottom-Left) */}
       <div className="absolute bottom-2 left-2 z-[400] flex items-center gap-1 bg-white/95 backdrop-blur-md p-1 rounded-xl shadow-md border border-outline-variant/60 text-[10px] font-semibold text-on-surface">
-        {(Object.keys(TILE_LAYERS) as MapTileStyle[]).map((style) => (
-          <button
-            key={style}
-            type="button"
-            onClick={() => setActiveTile(style)}
-            className={`px-2 py-1 rounded-lg capitalize transition-all cursor-pointer ${
-              activeTile === style
-                ? 'bg-primary text-white shadow-xs font-bold'
-                : 'text-on-surface-variant hover:bg-surface-container'
-            }`}
-          >
-            {style === 'streets' ? 'OSM Standard' : style}
-          </button>
-        ))}
+        <button
+          type="button"
+          id="btn-tile-streets"
+          onClick={() => setActiveTile('streets')}
+          className={`px-2 py-1 rounded-lg transition-all cursor-pointer ${
+            activeTile === 'streets'
+              ? 'bg-primary text-white shadow-xs font-bold'
+              : 'text-on-surface-variant hover:bg-surface-container'
+          }`}
+        >
+          Streets
+        </button>
+        <button
+          type="button"
+          id="btn-tile-satellite"
+          onClick={() => setActiveTile('satellite')}
+          className={`px-2 py-1 rounded-lg transition-all cursor-pointer ${
+            activeTile === 'satellite'
+              ? 'bg-primary text-white shadow-xs font-bold'
+              : 'text-on-surface-variant hover:bg-surface-container'
+          }`}
+        >
+          Satellite
+        </button>
+        <button
+          type="button"
+          id="btn-tile-clinical"
+          onClick={() => setActiveTile('clinical')}
+          className={`px-2 py-1 rounded-lg transition-all cursor-pointer ${
+            activeTile === 'clinical'
+              ? 'bg-primary text-white shadow-xs font-bold'
+              : 'text-on-surface-variant hover:bg-surface-container'
+          }`}
+        >
+          Carto
+        </button>
 
         <div className="h-3.5 w-[1px] bg-outline-variant/60 mx-0.5"></div>
 
         {/* Recenter Button */}
         <button
           type="button"
+          id="btn-map-recenter"
           onClick={handleRecenter}
           title="Recenter view on Hospital pin"
-          className="px-2 py-1 text-primary hover:bg-primary/10 rounded-lg flex items-center gap-1 cursor-pointer transition-colors"
+          className="px-2 py-1 text-primary hover:bg-primary/10 rounded-lg flex items-center gap-1 cursor-pointer transition-colors font-medium"
         >
           <span className="material-symbols-outlined text-[14px]">center_focus_strong</span>
           <span>Center</span>
         </button>
       </div>
 
-      {/* Floating Instructions Banner (Bottom) */}
+      {/* Floating Instructions Banner (Bottom-Right) */}
       {mapNotice && (
-        <div className="absolute bottom-2 right-12 z-[400] hidden sm:flex items-center gap-1.5 bg-slate-900/90 backdrop-blur-md text-white px-3 py-1 rounded-full text-[10px] shadow-md border border-white/20 pointer-events-none">
+        <div className="absolute bottom-2 right-2 z-[400] hidden sm:flex items-center gap-1.5 bg-slate-900/90 backdrop-blur-md text-white px-3 py-1 rounded-full text-[10px] shadow-md border border-white/20 pointer-events-none">
           <span className="material-symbols-outlined text-[13px] text-emerald-400">info</span>
           <span className="truncate max-w-[280px]">{mapNotice}</span>
         </div>

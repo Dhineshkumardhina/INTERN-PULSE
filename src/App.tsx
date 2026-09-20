@@ -113,18 +113,9 @@ const ADMIN_ALLOWED_SCREENS = new Set([
 const AppRouter: React.FC = () => {
   const { currentScreen, currentUser, setCurrentScreen } = useApp();
 
-  if (!currentUser || currentScreen === 'login') {
-    return (
-      <div className="w-full min-h-screen bg-surface-dim/30 flex justify-center overflow-x-hidden">
-        <div className="w-full max-w-md min-h-screen bg-background text-on-surface flex flex-col font-body-md antialiased relative shadow-2xl overflow-x-hidden">
-          <LoginScreen />
-        </div>
-      </div>
-    );
-  }
-
   // Security Role Guard: Verify that the current user has permission to access the requested screen
   const isAuthorized = (() => {
+    if (!currentUser || currentScreen === 'login') return true;
     switch (currentUser.role) {
       case 'STUDENT':
         return STUDENT_ALLOWED_SCREENS.has(currentScreen);
@@ -141,7 +132,7 @@ const AppRouter: React.FC = () => {
 
   // Synchronize state if unauthorized route attempted (e.g. HOD attempting direct Admin route)
   React.useEffect(() => {
-    if (!isAuthorized && currentUser) {
+    if (!isAuthorized && currentUser && currentScreen !== 'login') {
       if (currentUser.role === 'HOD') {
         setCurrentScreen('hod_dashboard');
       } else if (currentUser.role === 'MENTOR') {
@@ -151,6 +142,16 @@ const AppRouter: React.FC = () => {
       }
     }
   }, [isAuthorized, currentUser, currentScreen, setCurrentScreen]);
+
+  if (!currentUser || currentScreen === 'login') {
+    return (
+      <div className="w-full min-h-screen bg-surface-dim/30 flex justify-center overflow-x-hidden">
+        <div className="w-full max-w-md min-h-screen bg-background text-on-surface flex flex-col font-body-md antialiased relative shadow-2xl overflow-x-hidden">
+          <LoginScreen />
+        </div>
+      </div>
+    );
+  }
 
   // Render authorized screen or secure default fallback (Do NOT expose any Admin UI/data to HOD)
   const renderScreenContent = () => {

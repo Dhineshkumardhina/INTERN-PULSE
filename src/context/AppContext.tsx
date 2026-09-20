@@ -85,7 +85,7 @@ interface AppContextType {
   login: (id: string, password?: string) => boolean;
   logout: () => void;
   switchRoleQuickly: (role: UserRole) => void;
-  setCurrentScreen: (screen: string) => void;
+  setCurrentScreen: (screen: string, activeUser?: UserProfile | null) => void;
   setSelectedStudent: (regNumber: string | null) => void;
   setSelectedAlert: (alertId: string | null) => void;
   setGpsMode: (mode: GpsSimulationMode) => void;
@@ -355,8 +355,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Guarded setCurrentScreen strictly enforcing role hierarchy access
-  const setCurrentScreen = (screen: string) => {
-    if (screen === 'login' || !currentUser) {
+  const setCurrentScreen = (screen: string, activeUser?: UserProfile | null) => {
+    const user = activeUser !== undefined ? activeUser : currentUser;
+    if (screen === 'login' || !user) {
       setRawCurrentScreen('login');
       return;
     }
@@ -397,21 +398,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ...MENTOR_ALLOWED,
     ]);
 
-    if (currentUser.role === 'STUDENT') {
+    if (user.role === 'STUDENT') {
       if (!STUDENT_ALLOWED.has(screen)) {
-        console.warn(`[Access Denied] Student (${currentUser.id}) cannot access screen "${screen}". Redirecting to Student Dashboard.`);
+        console.warn(`[Access Denied] Student (${user.id}) cannot access screen "${screen}". Redirecting to Student Dashboard.`);
         setRawCurrentScreen('student_dashboard');
         return;
       }
-    } else if (currentUser.role === 'MENTOR') {
+    } else if (user.role === 'MENTOR') {
       if (!MENTOR_ALLOWED.has(screen)) {
-        console.warn(`[Access Denied] Mentor (${currentUser.id}) cannot access screen "${screen}". Redirecting to Mentor Dashboard.`);
+        console.warn(`[Access Denied] Mentor (${user.id}) cannot access screen "${screen}". Redirecting to Mentor Dashboard.`);
         setRawCurrentScreen('mentor_dashboard');
         return;
       }
-    } else if (currentUser.role === 'HOD') {
+    } else if (user.role === 'HOD') {
       if (!HOD_ALLOWED.has(screen)) {
-        console.warn(`[Access Denied] HOD (${currentUser.id}) cannot access screen "${screen}". Redirecting to HOD Dashboard.`);
+        console.warn(`[Access Denied] HOD (${user.id}) cannot access screen "${screen}". Redirecting to HOD Dashboard.`);
         setRawCurrentScreen('hod_dashboard');
         return;
       }
@@ -663,14 +664,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       setCurrentUser(user);
       if (user.role === 'STUDENT') {
-        setCurrentScreen('student_dashboard');
+        setCurrentScreen('student_dashboard', user);
         setSelectedStudent(user.registerNumber || '23UCCT001');
       } else if (user.role === 'MENTOR') {
-        setCurrentScreen('mentor_dashboard');
+        setCurrentScreen('mentor_dashboard', user);
       } else if (user.role === 'HOD') {
-        setCurrentScreen('hod_dashboard');
+        setCurrentScreen('hod_dashboard', user);
       } else if (user.role === 'ADMIN') {
-        setCurrentScreen('admin_dashboard');
+        setCurrentScreen('admin_dashboard', user);
       }
       return true;
     }
@@ -695,7 +696,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       };
       setCurrentUser(studentUser);
       setSelectedStudent(foundStudent.register_number);
-      setCurrentScreen('student_dashboard');
+      setCurrentScreen('student_dashboard', studentUser);
       return true;
     }
 
@@ -704,7 +705,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const logout = () => {
     setCurrentUser(null);
-    setCurrentScreen('login');
+    setRawCurrentScreen('login');
   };
 
   const switchRoleQuickly = (role: UserRole) => {
@@ -722,18 +723,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     if (role === 'STUDENT') {
-      setCurrentUser(DEMO_USERS['23UCCT001']);
+      const u = DEMO_USERS['23UCCT001'];
+      setCurrentUser(u);
       setSelectedStudent('23UCCT001');
-      setCurrentScreen('student_dashboard');
+      setCurrentScreen('student_dashboard', u);
     } else if (role === 'MENTOR') {
-      setCurrentUser(DEMO_USERS['mentor01']);
-      setCurrentScreen('mentor_dashboard');
+      const u = DEMO_USERS['mentor01'];
+      setCurrentUser(u);
+      setCurrentScreen('mentor_dashboard', u);
     } else if (role === 'HOD') {
-      setCurrentUser(DEMO_USERS['hod01']);
-      setCurrentScreen('hod_dashboard');
+      const u = DEMO_USERS['hod01'];
+      setCurrentUser(u);
+      setCurrentScreen('hod_dashboard', u);
     } else if (role === 'ADMIN') {
-      setCurrentUser(DEMO_USERS['admin01']);
-      setCurrentScreen('admin_dashboard');
+      const u = DEMO_USERS['admin01'];
+      setCurrentUser(u);
+      setCurrentScreen('admin_dashboard', u);
     }
   };
 

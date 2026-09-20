@@ -170,7 +170,7 @@ export const GeofenceSettingsScreen: React.FC = () => {
   const activeInternsCount = students.filter((s) => s.is_active_shift).length || 3;
 
   return (
-    <div className="min-h-screen bg-background text-on-background pb-32">
+    <div className="min-h-screen bg-background text-on-background pb-44">
       {/* Toast Notification */}
       {showSuccessToast && (
         <div
@@ -315,139 +315,136 @@ export const GeofenceSettingsScreen: React.FC = () => {
             </div>
           </div>
 
-          {/* Map Mode Display */}
-          {visualizerMode === 'map' && (
-            <div className="space-y-2">
-              <GeofenceMap
-                latitude={latitude}
-                longitude={longitude}
-                radiusMeters={radiusMeters}
-                toleranceMeters={toleranceMeters}
-                hospitalName={name}
-                onCoordinatesChange={(newLat, newLng) => {
-                  setLatitude(newLat);
-                  setLongitude(newLng);
-                  setReason(`Calibrated via interactive free map: ${newLat.toFixed(4)}°N, ${newLng.toFixed(4)}°E`);
-                }}
-                onRadiusChange={(newRadius) => {
-                  setRadiusMeters(newRadius);
-                }}
-                onFixGeofence={handleSaveGeofence}
-                hasUnsavedChanges={hasUnsavedChanges}
-                interns={students}
-                testDistance={testDistance}
-                className="h-[380px]"
-                interactive={true}
-              />
+          {/* Map Mode Display - Kept mounted in DOM with CSS visibility to preserve Leaflet map state */}
+          <div className={visualizerMode === 'map' ? 'space-y-2' : 'hidden'}>
+            <GeofenceMap
+              latitude={latitude}
+              longitude={longitude}
+              radiusMeters={radiusMeters}
+              toleranceMeters={toleranceMeters}
+              hospitalName={name}
+              onCoordinatesChange={(newLat, newLng) => {
+                setLatitude(newLat);
+                setLongitude(newLng);
+                setReason(`Calibrated via interactive free map: ${newLat.toFixed(4)}°N, ${newLng.toFixed(4)}°E`);
+              }}
+              onRadiusChange={(newRadius) => {
+                setRadiusMeters(newRadius);
+              }}
+              onFixGeofence={handleSaveGeofence}
+              hasUnsavedChanges={hasUnsavedChanges}
+              interns={students}
+              testDistance={testDistance}
+              className="h-[480px] w-full"
+              interactive={true}
+            />
 
-              {/* Instant Fix Action Banner directly below Map */}
-              {hasUnsavedChanges ? (
-                <div className="bg-amber-500/10 border-2 border-amber-500/40 rounded-xl p-3 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-sm">
-                  <div className="flex items-center gap-2.5">
-                    <span className="material-symbols-outlined text-amber-600 text-[24px] animate-pulse shrink-0">
-                      pin_drop
-                    </span>
-                    <div>
-                      <p className="text-xs font-bold text-amber-900 dark:text-amber-200">
-                        Geofence Position / Radius Adjusted
-                      </p>
-                      <p className="text-[11px] text-amber-800/90 dark:text-amber-300/90">
-                        Center: {latitude.toFixed(4)}°N, {longitude.toFixed(4)}°E (Radius: {radiusMeters}m). Tap to fix & apply across all shifts.
-                      </p>
-                    </div>
+            {/* Instant Fix Action Banner directly below Map */}
+            {hasUnsavedChanges ? (
+              <div className="bg-amber-500/10 border-2 border-amber-500/40 rounded-xl p-3 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-sm">
+                <div className="flex items-center gap-2.5">
+                  <span className="material-symbols-outlined text-amber-600 text-[24px] animate-pulse shrink-0">
+                    pin_drop
+                  </span>
+                  <div>
+                    <p className="text-xs font-bold text-amber-900 dark:text-amber-200">
+                      Geofence Position / Radius Adjusted
+                    </p>
+                    <p className="text-[11px] text-amber-800/90 dark:text-amber-300/90">
+                      Center: {latitude.toFixed(4)}°N, {longitude.toFixed(4)}°E (Radius: {radiusMeters}m). Tap to fix & apply across all shifts.
+                    </p>
                   </div>
-                  <button
-                    id="btn-fix-geofence-quick"
-                    type="button"
-                    onClick={handleSaveGeofence}
-                    className="w-full sm:w-auto px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-md hover:shadow-lg active:scale-95 transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer"
-                  >
-                    <span className="material-symbols-outlined text-[18px]">lock</span>
-                    <span>Fix & Enforce Geofence ({radiusMeters}m)</span>
-                  </button>
                 </div>
-              ) : (
-                <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-2.5 flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2 text-emerald-800 dark:text-emerald-300 text-xs font-semibold">
-                    <span className="material-symbols-outlined text-emerald-600 text-[18px]">verified</span>
-                    <span>Geofence Fixed & Active ({hospitalGeofence.radius_meters}m)</span>
-                  </div>
-                  <span className="text-[10px] text-emerald-700 dark:text-emerald-400 font-mono">
-                    {hospitalGeofence.latitude.toFixed(4)}°N, {hospitalGeofence.longitude.toFixed(4)}°E
-                  </span>
-                </div>
-              )}
-
-              {/* Free Map Action Guidance Box */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[10px] bg-surface-container-low p-2.5 rounded-xl border border-outline-variant/60">
-                <div className="flex items-start gap-1.5">
-                  <span className="w-4 h-4 rounded-full bg-primary text-white font-bold text-[9px] flex items-center justify-center shrink-0 mt-0.5">1</span>
-                  <span className="text-on-surface-variant leading-tight">
-                    <strong className="text-on-surface">Set Epicenter:</strong> Drag the blue hospital pin or click anywhere on the free map.
-                  </span>
-                </div>
-                <div className="flex items-start gap-1.5">
-                  <span className="w-4 h-4 rounded-full bg-amber-500 text-white font-bold text-[9px] flex items-center justify-center shrink-0 mt-0.5">2</span>
-                  <span className="text-on-surface-variant leading-tight">
-                    <strong className="text-on-surface">Adjust Radius:</strong> Drag the amber dot on the circle boundary or tap preset chips.
-                  </span>
-                </div>
-                <div className="flex items-start gap-1.5">
-                  <span className="w-4 h-4 rounded-full bg-emerald-600 text-white font-bold text-[9px] flex items-center justify-center shrink-0 mt-0.5">3</span>
-                  <span className="text-on-surface-variant leading-tight">
-                    <strong className="text-on-surface">Test Intern:</strong> Drag the Arun intern marker across the line to test breach alerts.
-                  </span>
-                </div>
+                <button
+                  id="btn-fix-geofence-quick"
+                  type="button"
+                  onClick={handleSaveGeofence}
+                  className="w-full sm:w-auto px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-md hover:shadow-lg active:scale-95 transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-[18px]">lock</span>
+                  <span>Fix & Enforce Geofence ({radiusMeters}m)</span>
+                </button>
               </div>
+            ) : (
+              <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-2.5 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 text-emerald-800 dark:text-emerald-300 text-xs font-semibold">
+                  <span className="material-symbols-outlined text-emerald-600 text-[18px]">verified</span>
+                  <span>Geofence Fixed & Active ({hospitalGeofence.radius_meters}m)</span>
+                </div>
+                <span className="text-[10px] text-emerald-700 dark:text-emerald-400 font-mono">
+                  {hospitalGeofence.latitude.toFixed(4)}°N, {hospitalGeofence.longitude.toFixed(4)}°E
+                </span>
+              </div>
+            )}
 
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1.5 text-[11px] bg-primary/5 p-2.5 rounded-xl border border-primary/20">
-                <div className="flex items-center gap-1.5 text-primary font-medium">
-                  <span className="material-symbols-outlined text-[16px]">verified</span>
-                  <span>Free OpenStreetMap Active • Ready to calibrate campus perimeter</span>
-                </div>
-                <div className="flex items-center gap-2 font-mono text-[10px] text-on-surface-variant">
-                  <span className="font-semibold text-primary">{latitude.toFixed(4)}°N, {longitude.toFixed(4)}°E</span>
-                  <span>|</span>
-                  <span className="font-bold text-primary">R = {radiusMeters}m</span>
-                </div>
+            {/* Free Map Action Guidance Box */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[10px] bg-surface-container-low p-2.5 rounded-xl border border-outline-variant/60">
+              <div className="flex items-start gap-1.5">
+                <span className="w-4 h-4 rounded-full bg-primary text-white font-bold text-[9px] flex items-center justify-center shrink-0 mt-0.5">1</span>
+                <span className="text-on-surface-variant leading-tight">
+                  <strong className="text-on-surface">Set Epicenter:</strong> Drag the blue hospital pin or click anywhere on the free map.
+                </span>
+              </div>
+              <div className="flex items-start gap-1.5">
+                <span className="w-4 h-4 rounded-full bg-amber-500 text-white font-bold text-[9px] flex items-center justify-center shrink-0 mt-0.5">2</span>
+                <span className="text-on-surface-variant leading-tight">
+                  <strong className="text-on-surface">Adjust Radius:</strong> Drag the amber dot on the circle boundary or tap preset chips.
+                </span>
+              </div>
+              <div className="flex items-start gap-1.5">
+                <span className="w-4 h-4 rounded-full bg-emerald-600 text-white font-bold text-[9px] flex items-center justify-center shrink-0 mt-0.5">3</span>
+                <span className="text-on-surface-variant leading-tight">
+                  <strong className="text-on-surface">Test Intern:</strong> Drag the Arun intern marker across the line to test breach alerts.
+                </span>
               </div>
             </div>
-          )}
+
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1.5 text-[11px] bg-primary/5 p-2.5 rounded-xl border border-primary/20">
+              <div className="flex items-center gap-1.5 text-primary font-medium">
+                <span className="material-symbols-outlined text-[16px]">verified</span>
+                <span>Free OpenStreetMap Active • Ready to calibrate campus perimeter</span>
+              </div>
+              <div className="flex items-center gap-2 font-mono text-[10px] text-on-surface-variant">
+                <span className="font-semibold text-primary">{latitude.toFixed(4)}°N, {longitude.toFixed(4)}°E</span>
+                <span>|</span>
+                <span className="font-bold text-primary">R = {radiusMeters}m</span>
+              </div>
+            </div>
+          </div>
 
           {/* Radar Canvas Display */}
-          {visualizerMode === 'radar' && (
-            <div className="space-y-2">
-              <div className="relative w-full aspect-square max-w-[280px] mx-auto bg-slate-950 rounded-2xl border border-primary/30 p-2 flex items-center justify-center overflow-hidden shadow-inner">
-                {/* Concentric Distance Grid Lines */}
-                <div className="absolute w-[240px] h-[240px] rounded-full border border-slate-800/80 pointer-events-none"></div>
-                <div className="absolute w-[180px] h-[180px] rounded-full border border-slate-800/80 pointer-events-none"></div>
-                <div className="absolute w-[120px] h-[120px] rounded-full border border-slate-800/80 pointer-events-none"></div>
-                <div className="absolute w-[60px] h-[60px] rounded-full border border-slate-800/80 pointer-events-none"></div>
+          <div className={visualizerMode === 'radar' ? 'space-y-2' : 'hidden'}>
+            <div className="relative w-full aspect-square max-w-[280px] mx-auto bg-slate-950 rounded-2xl border border-primary/30 p-2 flex items-center justify-center overflow-hidden shadow-inner">
+              {/* Concentric Distance Grid Lines */}
+              <div className="absolute w-[240px] h-[240px] rounded-full border border-slate-800/80 pointer-events-none"></div>
+              <div className="absolute w-[180px] h-[180px] rounded-full border border-slate-800/80 pointer-events-none"></div>
+              <div className="absolute w-[120px] h-[120px] rounded-full border border-slate-800/80 pointer-events-none"></div>
+              <div className="absolute w-[60px] h-[60px] rounded-full border border-slate-800/80 pointer-events-none"></div>
 
-                {/* Radar Crosshairs */}
-                <div className="absolute inset-x-0 top-1/2 h-[1px] bg-slate-800/60 pointer-events-none"></div>
-                <div className="absolute inset-y-0 left-1/2 w-[1px] bg-slate-800/60 pointer-events-none"></div>
+              {/* Radar Crosshairs */}
+              <div className="absolute inset-x-0 top-1/2 h-[1px] bg-slate-800/60 pointer-events-none"></div>
+              <div className="absolute inset-y-0 left-1/2 w-[1px] bg-slate-800/60 pointer-events-none"></div>
 
-                {/* Range markers */}
-                <span className="absolute top-2 left-1/2 -translate-x-1/2 text-[8px] font-mono text-slate-500">
-                  500m
-                </span>
-                <span className="absolute top-8 left-1/2 -translate-x-1/2 text-[8px] font-mono text-slate-500">
-                  300m
-                </span>
-                <span className="absolute top-15 left-1/2 -translate-x-1/2 text-[8px] font-mono text-slate-500">
-                  150m
-                </span>
+              {/* Range markers */}
+              <span className="absolute top-2 left-1/2 -translate-x-1/2 text-[8px] font-mono text-slate-500">
+                500m
+              </span>
+              <span className="absolute top-8 left-1/2 -translate-x-1/2 text-[8px] font-mono text-slate-500">
+                300m
+              </span>
+              <span className="absolute top-15 left-1/2 -translate-x-1/2 text-[8px] font-mono text-slate-500">
+                150m
+              </span>
 
-                {/* Peripheral Hospital Buildings */}
-                <div className="absolute top-5 left-7 flex flex-col items-center pointer-events-none opacity-60">
-                  <span className="material-symbols-outlined text-[14px] text-slate-400">biomedical</span>
-                  <span className="text-[7px] text-slate-400">Stat Labs</span>
-                </div>
-                <div className="absolute bottom-6 right-6 flex flex-col items-center pointer-events-none opacity-60">
-                  <span className="material-symbols-outlined text-[14px] text-slate-400">emergency</span>
-                  <span className="text-[7px] text-slate-400">Trauma OT</span>
-                </div>
+              {/* Peripheral Hospital Buildings */}
+              <div className="absolute top-5 left-7 flex flex-col items-center pointer-events-none opacity-60">
+                <span className="material-symbols-outlined text-[14px] text-slate-400">biomedical</span>
+                <span className="text-[7px] text-slate-400">Stat Labs</span>
+              </div>
+              <div className="absolute bottom-6 right-6 flex flex-col items-center pointer-events-none opacity-60">
+                <span className="material-symbols-outlined text-[14px] text-slate-400">emergency</span>
+                <span className="text-[7px] text-slate-400">Trauma OT</span>
+              </div>
                 <div className="absolute top-7 right-7 flex flex-col items-center pointer-events-none opacity-60">
                   <span className="material-symbols-outlined text-[14px] text-slate-400">bloodtype</span>
                   <span className="text-[7px] text-slate-400">Blood Bank</span>
@@ -519,7 +516,6 @@ export const GeofenceSettingsScreen: React.FC = () => {
                 Dynamic blue ring represents the enforced boundary. Green dot reflects test location.
               </p>
             </div>
-          )}
         </section>
 
         {/* 1-Tap Institutional Presets */}
